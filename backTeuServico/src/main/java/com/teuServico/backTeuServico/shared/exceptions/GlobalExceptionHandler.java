@@ -1,4 +1,4 @@
-package com.teuServico.backTeuServico.services.exceptions;
+package com.teuServico.backTeuServico.shared.exceptions;
 import org.springframework.cglib.proxy.UndeclaredThrowableException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-
     private HttpHeaders headers(){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

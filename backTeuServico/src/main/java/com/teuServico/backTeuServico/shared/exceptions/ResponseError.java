@@ -1,4 +1,4 @@
-package com.teuServico.backTeuServico.services.exceptions;
+package com.teuServico.backTeuServico.shared.exceptions;
 import java.util.Date;
 
 public class ResponseError {
