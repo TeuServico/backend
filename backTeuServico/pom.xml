@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<aws.version>2.20.0</aws.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -62,6 +63,13 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+
+		<!--AWS service S3-->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>${aws.version}</version>
+		</dependency>
 
 
     </dependencies>
