@@ -1,4 +1,28 @@
 package com.teuServico.backTeuServico.appUsuarios.model;
 
+import com.teuServico.backTeuServico.appUsuarios.dto.ProfissionalRequestDTO;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.UUID;
+
+@Getter
+@Setter
+@Entity
+@Table(name = "profissionais")
 public class Profissional {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column(nullable = false)
+    private String profissao;
+
+    public Profissional(){}
+
+    public Profissional(ProfissionalRequestDTO profissionalRequestDTO){
+        // TODO obter dados de ProfissionalRequestDTO
+    }
 }
