@@ -1,4 +1,33 @@
-package com.teuServico.backTeuServico.appServicos.dto;
+package com.teuservico.backTeuServico.agendamento.appServicos.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+import java.math.BigDecimal;
+import java.util.UUID;
+
+@Getter
+@Setter
 public class OfertaServicoResponseDTO {
+    private Long id;
+    private UUID profissionalId;
+    private String profissionalNome;
+    private Long tipoServicoId;
+    private String tipoServicoNome;
+    private BigDecimal preco;
+    private Integer duracaoMinutos;
+    private String descricao;
+
+    public OfertaServicoResponseDTO() {
+    }
+
+    public OfertaServicoResponseDTO(OfertaServico ofertaServico) {
+        this.id = ofertaServico.getId();
+        this.profissionalId = ofertaServico.getProfissional().getId();
+        this.profissionalNome = ofertaServico.getProfissional().getNomeCompleto();
+        this.tipoServicoId = ofertaServico.getTipoServico().getId();
+        this.tipoServicoNome = ofertaServico.getTipoServico().getNome();
+        this.preco = ofertaServico.getPreco();
+        this.duracaoMinutos = ofertaServico.getDuracaoMinutos();
+        this.descricao = ofertaServico.getDescricao();
+    }
 }
