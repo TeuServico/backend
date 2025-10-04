@@ -11,7 +11,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "profissionais")
-public class Profissional {
+public class Profissional extends UsuarioBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
