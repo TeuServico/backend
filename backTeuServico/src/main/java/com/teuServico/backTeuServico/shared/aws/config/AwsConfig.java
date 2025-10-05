@@ -10,11 +10,29 @@ import software.amazon.awssdk.services.s3.S3Configuration;
 
 import java.net.URI;
 
+/**
+ * Classe de configuração AWS para integração com o serviço Amazon S3.
+ * <p>
+ * Esta classe configura um bean do {@link S3Client} permitindo a comunicação com buckets S3.
+ * <p>
+ * As credenciais e o endpoint são obtidos de variáveis de ambiente:
+ * <ul>
+ *   <li><strong>AWS_ENDPOINT</strong>: URL do endpoint S3 (ex: http://localhost:4566 para LocalStack)</li>
+ *   <li><strong>AWS_ACESS_KEY</strong>: Chave de acesso AWS</li>
+ *   <li><strong>AWS_SECRET_KEY</strong>: Chave secreta AWS</li>
+ * </ul>
+ */
+
 @Configuration
 public class AwsConfig {
     private String endpoint = System.getenv("AWS_ENDPOINT");
     private String awsAcessKey = System.getenv("AWS_ACESS_KEY");
     private  String awsSecret_Key = System.getenv("AWS_SECRET_KEY");
+
+    /**
+     * Cria e configura um bean do {@link S3Client} para acesso ao serviço Amazon S3.
+     * @return instância configurada de {@link S3Client}
+     */
 
     @Bean
     public S3Client s3Client(){

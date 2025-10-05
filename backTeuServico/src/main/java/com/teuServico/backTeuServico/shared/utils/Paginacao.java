@@ -11,9 +11,24 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Serviço utilitário responsável por realizar a paginação de entidades genéricas.
+ */
 @Service
 public class Paginacao {
 
+    /**
+     * Lista entidades de forma paginada a partir de um repositório JPA
+     *
+     * @param <T> Tipo da entidade original.
+     * @param <R> Tipo mapeado para retorno(ReponseDTO)
+     * @param pagina Número da página solicitada (base 1).
+     * @param repository Repositório JPA da entidade.
+     * @param mapper Função de mapeamento da entidade original para o tipo de retorno(ReponseDTO) do conteudo
+     * @param sort Critério de ordenação a ser aplicado.
+     * @return Um objeto {@link PaginacaoResponseDTO} contendo os dados paginados
+     * @throws BusinessException Se o número da página for maior que o total de páginas disponíveis.
+     */
     public <T, R> PaginacaoResponseDTO<R> listarEntidades(int pagina, JpaRepository<T, Long> repository, Function<T, R> mapper, Sort sort) {
         int numeroPagina= pagina;
         numeroPagina = Math.max(0, numeroPagina - 1);

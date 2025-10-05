@@ -1,10 +1,25 @@
 package com.teuServico.backTeuServico.shared.exceptions;
 import java.util.Date;
 
+/**
+ * Padroniza as respostas da aplicação.
+ */
 public class ResponseError {
+    /**
+     * Data e hora em que o erro ocorreu.
+     */
     private Date timestamp = new Date();
+    /**
+     * Status textual da resposta.
+     */
     private String status = "error";
+    /**
+     * Código HTTP associado ao erro.
+     */
     private int statusCode = 400;
+    /**
+     * Mensagem descritiva do erro ocorrido.
+     */
     private String error;
 
     public Date getTimestamp() {
