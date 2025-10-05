@@ -1,4 +1,4 @@
-package com.teuservico.backTeuServico.agendamento.dto;
+package com.teuServico.backTeuServico.agendamento.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,8 +9,7 @@ import java.util.UUID;
 @Setter
 public class AgendamentoRequestDTO {
     private UUID clienteId;
-    private UUID profissionalId;
-    private Long tipoServicoId;
-    private LocalDateTime dataHora;
+    private Long ofertaServicoId;
+    private LocalDateTime dataEntrega;
     private String observacoes;
 }

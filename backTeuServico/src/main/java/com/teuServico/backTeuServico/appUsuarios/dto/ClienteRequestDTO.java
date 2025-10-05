@@ -1,4 +1,4 @@
-package com.teuservico.backTeuServico.appUsuarios.dto;
+package com.teuServico.backTeuServico.appUsuarios.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,5 +10,4 @@ public class ClienteRequestDTO {
     private String email;
     private String telefone;
     private String cpf;
-    private String senha;
 }

@@ -1,4 +1,4 @@
-package com.teuservico.backTeuServico.agendamento.appServicos.dto;
+package com.teuServico.backTeuServico.appServicos.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,6 +7,5 @@ import lombok.Setter;
 @Setter
 public class TipoServicoRequestDTO {
     private String nome;
-    private String descricao;
     private String categoria;
 }

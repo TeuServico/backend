@@ -1,4 +1,4 @@
-package com.teuservico.backTeuServico.agendamento.appServicos.dto;
+package com.teuServico.backTeuServico.appServicos.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +10,5 @@ import java.util.UUID;
 public class OfertaServicoRequestDTO {
     private UUID profissionalId;
     private Long tipoServicoId;
-    private BigDecimal preco;
-    private Integer duracaoMinutos;
     private String descricao;
 }

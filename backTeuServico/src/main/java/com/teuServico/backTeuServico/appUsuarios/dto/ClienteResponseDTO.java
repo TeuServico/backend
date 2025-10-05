@@ -1,5 +1,6 @@
-package com.teuservico.backTeuServico.appUsuarios.dto;
+package com.teuServico.backTeuServico.appUsuarios.dto;
 
+import com.teuServico.backTeuServico.appUsuarios.model.Cliente;
 import lombok.Getter;
 import lombok.Setter;
 import java.util.UUID;
