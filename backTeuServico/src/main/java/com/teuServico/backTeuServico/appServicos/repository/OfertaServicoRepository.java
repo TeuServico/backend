@@ -1,4 +1,9 @@
 package com.teuServico.backTeuServico.appServicos.repository;
 
-public interface OfertaServicoRepository {
+import com.teuServico.backTeuServico.appServicos.model.OfertaServico;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface OfertaServicoRepository extends JpaRepository<OfertaServico, Long> {
 }
