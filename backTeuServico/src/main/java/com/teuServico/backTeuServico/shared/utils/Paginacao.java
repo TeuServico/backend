@@ -16,23 +16,23 @@ import java.util.stream.Collectors;
  */
 @Service
 public class Paginacao {
-
     /**
      * Lista entidades de forma paginada a partir de um repositório JPA
      *
      * @param <T> Tipo da entidade original.
      * @param <R> Tipo mapeado para retorno(ReponseDTO)
      * @param pagina Número da página solicitada (base 1).
+     * @param qtdMaximaDeElementos Numeros de elementos que estarao presentes em um página
      * @param repository Repositório JPA da entidade.
      * @param mapper Função de mapeamento da entidade original para o tipo de retorno(ReponseDTO) do conteudo
      * @param sort Critério de ordenação a ser aplicado.
      * @return Um objeto {@link PaginacaoResponseDTO} contendo os dados paginados
      * @throws BusinessException Se o número da página for maior que o total de páginas disponíveis.
      */
-    public <T, R> PaginacaoResponseDTO<R> listarEntidades(int pagina, JpaRepository<T, Long> repository, Function<T, R> mapper, Sort sort) {
+    public <T, R, ID> PaginacaoResponseDTO<R> listarEntidades(int pagina, int qtdMaximaDeElementos, JpaRepository<T, ID> repository, Function<T, R> mapper, Sort sort) {
         int numeroPagina= pagina;
         numeroPagina = Math.max(0, numeroPagina - 1);
-        Pageable pageable = PageRequest.of(numeroPagina, 10, sort);
+        Pageable pageable = PageRequest.of(numeroPagina, qtdMaximaDeElementos, sort);
         Page<T> page = repository.findAll(pageable);
         if (numeroPagina >= page.getTotalPages()) {
             throw new BusinessException("O número da página não pode ser maior que o total de páginas.");
