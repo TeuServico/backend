@@ -23,6 +23,9 @@ public class Profissional extends UsuarioBase {
     public Profissional(){}
 
     public Profissional(ProfissionalRequestDTO profissionalRequestDTO){
-        // TODO obter dados de ProfissionalRequestDTO
+        super.nomeCompleto = profissionalRequestDTO.getNomeCompleto();
+        super.telefone = profissionalRequestDTO.getTelefone();
+        super.cpf = profissionalRequestDTO.getCpf();
+        this.profissao = profissionalRequestDTO.getProfissao();
     }
 }

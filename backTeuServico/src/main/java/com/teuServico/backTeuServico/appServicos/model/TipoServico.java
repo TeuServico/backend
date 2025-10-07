@@ -26,7 +26,8 @@ public class TipoServico {
     public TipoServico() {}
 
     public TipoServico(TipoServicoRequestDTO tipoServicoRequestDTO) {
-     // TODO obter dados de tipoServicoRequestDTO
+        this.nome = tipoServicoRequestDTO.getNome();
+        this.categoria = tipoServicoRequestDTO.getCategoria();
     }
 
 }

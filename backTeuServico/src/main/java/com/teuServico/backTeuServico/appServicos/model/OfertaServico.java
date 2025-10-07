@@ -31,8 +31,10 @@ public class OfertaServico {
 
     }
 
-    public OfertaServico(OfertaServicoRequestDTO ofertaServicoRequestDTO){
-        // TODO obter dados de ofertaServicoRequestDTO
+    public OfertaServico(OfertaServicoRequestDTO ofertaServicoRequestDTO, TipoServico tipoServico, Profissional profissional){
+        this.descricao = ofertaServicoRequestDTO.getDescricao();
+        this.tipoServico = tipoServico;
+        this.profissional = profissional;
     }
 
 }

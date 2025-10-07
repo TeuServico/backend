@@ -32,7 +32,8 @@ public class CredencialUsuario {
     }
 
     public CredencialUsuario(CredenciaisUsuarioRequestDTO credenciaisUsuarioRequestDTO){
-        // TODO obter dados de credenciasUsuarioRequestDTO
+        this.email = credenciaisUsuarioRequestDTO.getEmail();
+        this.senha = credenciaisUsuarioRequestDTO.getSenha();
     }
 
 }

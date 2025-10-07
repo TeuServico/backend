@@ -42,8 +42,11 @@ public class Agendamento {
 
     public Agendamento() {}
 
-    public Agendamento(AgendamentoRequestDTO agendamentoRequestDTO) {
-        // TODO obter os dados de AgendamentoRequestDTO
+    public Agendamento(AgendamentoRequestDTO agendamentoRequestDTO, Cliente cliente, OfertaServico ofertaServico) {
+        this.dataDeEntrega = agendamentoRequestDTO.getDataEntrega();
+        this.observacoes = agendamentoRequestDTO.getObservacoes();
+        this.cliente = cliente;
+        this.ofertaServico = ofertaServico;
     }
 
     @PrePersist

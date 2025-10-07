@@ -20,7 +20,10 @@ public class Cliente extends UsuarioBase {
     public Cliente() {}
 
     public Cliente(ClienteRequestDTO clienteRequestDTO) {
-        // TODO obter dados de clienteRequestDTO
+        super.nomeCompleto = clienteRequestDTO.getNomeCompleto();
+        super.telefone = clienteRequestDTO.getTelefone();
+        super.cpf = clienteRequestDTO.getTelefone();
+        super.endereco = clienteRequestDTO.getEndereco();
     }
 
 }
