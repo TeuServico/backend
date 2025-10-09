@@ -19,6 +19,7 @@ public class ClienteRequestDTO {
     @NotBlank(message = "telefone é inválido")
     private String telefone;
 
+    @NotBlank(message = "cpf é inválido")
     @CPF(message = "cpf é inválido")
     private String cpf;
 

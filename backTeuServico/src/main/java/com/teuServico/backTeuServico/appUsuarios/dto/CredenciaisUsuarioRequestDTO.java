@@ -8,6 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CredenciaisUsuarioRequestDTO {
+    @NotBlank(message = "email é inválido")
     @Email(message = "email é inválido")
     private String email;
 

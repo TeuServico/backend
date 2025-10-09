@@ -19,11 +19,12 @@ public class Cliente extends UsuarioBase {
 
     public Cliente() {}
 
-    public Cliente(ClienteRequestDTO clienteRequestDTO) {
+    public Cliente(ClienteRequestDTO clienteRequestDTO, CredencialUsuario credencialUsuario) {
         super.nomeCompleto = clienteRequestDTO.getNomeCompleto();
         super.telefone = clienteRequestDTO.getTelefone();
-        super.cpf = clienteRequestDTO.getTelefone();
+        super.cpf = clienteRequestDTO.getCpf();
         super.endereco = clienteRequestDTO.getEndereco();
+        super.credencialUsuario = credencialUsuario;
     }
 
 }

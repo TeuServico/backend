@@ -24,6 +24,6 @@ public abstract class UsuarioBase {
 
     @OneToOne
     @JoinColumn(name = "id_credenciais")
-    private CredencialUsuario credencialUsuario;
+    protected CredencialUsuario credencialUsuario;
 
 }
