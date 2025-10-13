@@ -21,6 +21,7 @@ public class Endereco {
     @Size(max = 10, message = "numero deve ter no máximo 5 caracteres")
     private String numero;
 
+    @NotBlank(message = "complemento é inválido")
     @Size(max = 50, message = "complemento deve ter no máximo 50 caracteres")
     private String complemento;
 
