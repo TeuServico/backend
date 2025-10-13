@@ -22,10 +22,12 @@ public class Profissional extends UsuarioBase {
 
     public Profissional(){}
 
-    public Profissional(ProfissionalRequestDTO profissionalRequestDTO){
+    public Profissional(ProfissionalRequestDTO profissionalRequestDTO, CredencialUsuario credencialUsuario){
         super.nomeCompleto = profissionalRequestDTO.getNomeCompleto();
         super.telefone = profissionalRequestDTO.getTelefone();
         super.cpf = profissionalRequestDTO.getCpf();
+        super.endereco = profissionalRequestDTO.getEndereco();
+        super.credencialUsuario = credencialUsuario;
         this.profissao = profissionalRequestDTO.getProfissao();
     }
 }

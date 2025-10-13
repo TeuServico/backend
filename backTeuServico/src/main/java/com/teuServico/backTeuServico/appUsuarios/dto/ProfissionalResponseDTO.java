@@ -13,6 +13,7 @@ public class ProfissionalResponseDTO {
     private String email;
     private String telefone;
     private String profissao;
+    private UUID idCredencial;
 
     public ProfissionalResponseDTO() {
     }
@@ -23,5 +24,6 @@ public class ProfissionalResponseDTO {
         this.email = profissional.getCredencialUsuario().getEmail();
         this.telefone = profissional.getTelefone();
         this.profissao = profissional.getProfissao();
+        this.idCredencial = profissional.getId();
     }
 }
