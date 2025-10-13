@@ -22,6 +22,9 @@ public abstract class UsuarioBase {
     @Column(nullable = false)
     protected Endereco endereco;
 
+    @Column
+    protected String UrlFotoPerfil; // TODO implementar metodo para update de foto de perfil
+
     @OneToOne
     @JoinColumn(name = "id_credenciais")
     protected CredencialUsuario credencialUsuario;
