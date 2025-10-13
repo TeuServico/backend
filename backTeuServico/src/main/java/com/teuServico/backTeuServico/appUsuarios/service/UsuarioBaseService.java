@@ -6,6 +6,7 @@ import com.teuServico.backTeuServico.appUsuarios.repository.CredenciaisUsuarioRe
 import com.teuServico.backTeuServico.appUsuarios.repository.ProfissionalRepository;
 import com.teuServico.backTeuServico.shared.exceptions.BusinessException;
 import com.teuServico.backTeuServico.shared.utils.Criptografia;
+import com.teuServico.backTeuServico.shared.utils.BaseService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,12 +15,14 @@ public class UsuarioBaseService {
     private final ClienteRepository clienteRepository;
     private final ProfissionalRepository profissionalRepository;
     private final Criptografia criptografia;
+    private final BaseService baseService;
 
-    public UsuarioBaseService(CredenciaisUsuarioRepository credenciaisUsuarioRepository, ClienteRepository clienteRepository, ProfissionalRepository profissionalRepository, Criptografia criptografia) {
+    public UsuarioBaseService(CredenciaisUsuarioRepository credenciaisUsuarioRepository, ClienteRepository clienteRepository, ProfissionalRepository profissionalRepository, Criptografia criptografia, BaseService baseService) {
         this.credenciaisUsuarioRepository = credenciaisUsuarioRepository;
         this.clienteRepository = clienteRepository;
         this.profissionalRepository = profissionalRepository;
         this.criptografia = criptografia;
+        this.baseService = baseService;
     }
 
     private boolean cpfJaCadastrado(String cpf) {
@@ -32,11 +35,25 @@ public class UsuarioBaseService {
                 profissionalRepository.findByTelefone(telefone).isPresent();
     }
 
-    public <T extends UsuarioBase> T normalizarUsuario(T usuario){
-        return usuario; //TODO implementar normalizacao dos dados
+
+    public <T extends UsuarioBase> T normalizarUsuario(T usuarioBase) {
+        usuarioBase.setNomeCompleto(baseService.normalizarString(usuarioBase.getNomeCompleto()));
+        CredencialUsuario credencialUsuario = usuarioBase.getCredencialUsuario();
+        credencialUsuario.setEmail(baseService.normalizarString(credencialUsuario.getEmail()));
+
+        Endereco endereco = usuarioBase.getEndereco();
+        endereco.setRua(baseService.normalizarString(endereco.getRua()));
+        endereco.setNumero(baseService.normalizarString(endereco.getNumero()));
+        endereco.setComplemento(baseService.normalizarString(endereco.getComplemento()));
+        endereco.setBairro(baseService.normalizarString(endereco.getBairro()));
+        endereco.setCidade(baseService.normalizarString(endereco.getCidade()));
+        endereco.setCep(baseService.normalizarString(endereco.getCep()));
+
+        return usuarioBase;
     }
 
     public void validarUnicidadeUsuario(String cpf, String email, String telefone) {
+        email = baseService.normalizarString(email);
         cpf = criptografia.criptografar(cpf);
         telefone = criptografia.criptografar(telefone);
         if (credenciaisUsuarioRepository.findByEmail(email).isPresent()) {
@@ -49,29 +66,25 @@ public class UsuarioBaseService {
     }
 
 
-    public <T extends UsuarioBase>  T criptografarUsuario(T usuario){
+    public <T extends UsuarioBase> T criptografarUsuario(T usuarioBase) {
+        T usuario = normalizarUsuario(usuarioBase);
         usuario.setNomeCompleto(criptografia.criptografar(usuario.getNomeCompleto()));
         usuario.setTelefone(criptografia.criptografar(usuario.getTelefone()));
         usuario.setCpf(criptografia.criptografar(usuario.getCpf()));
 
-        Endereco enderecoOriginal = usuario.getEndereco();
-        Endereco enderecoCriptografado = new Endereco();
-
-        enderecoCriptografado.setRua(criptografia.criptografar(enderecoOriginal.getRua()));
-        enderecoCriptografado.setNumero(criptografia.criptografar(enderecoOriginal.getNumero()));
-        enderecoCriptografado.setComplemento(criptografia.criptografar(enderecoOriginal.getComplemento()));
-        enderecoCriptografado.setBairro(criptografia.criptografar(enderecoOriginal.getBairro()));
-        enderecoCriptografado.setCidade(criptografia.criptografar(enderecoOriginal.getCidade()));
-        enderecoCriptografado.setCep(criptografia.criptografar(enderecoOriginal.getCep()));
-        enderecoCriptografado.setEstado(enderecoOriginal.getEstado());
-
-        usuario.setEndereco(enderecoCriptografado);
+        Endereco endereco = usuario.getEndereco();
+        endereco.setRua(criptografia.criptografar(endereco.getRua()));
+        endereco.setNumero(criptografia.criptografar(endereco.getNumero()));
+        endereco.setComplemento(criptografia.criptografar(endereco.getComplemento()));
+        endereco.setBairro(criptografia.criptografar(endereco.getBairro()));
+        endereco.setCidade(criptografia.criptografar(endereco.getCidade()));
+        endereco.setCep(criptografia.criptografar(endereco.getCep()));
 
         return usuario;
-
     }
 
     public <T extends UsuarioBase> T  descriptografarUsuario(T usuarioBase){
+
         usuarioBase.setNomeCompleto(criptografia.descriptografar(usuarioBase.getNomeCompleto()));
         usuarioBase.setTelefone(criptografia.descriptografar(usuarioBase.getTelefone()));
         usuarioBase.setCpf(criptografia.descriptografar(usuarioBase.getCpf()));
