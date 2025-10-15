@@ -12,10 +12,7 @@ public class BaseService {
     }
 
     public void validarId(String valorParametro){
-        if (valorParametro == null || valorParametro.isBlank()) {
-            String motivo = valorParametro == null ? "nulo" : "vazio";
-            throw new BusinessException(String.format("ID não pode ser %s", motivo));
-        }
+        verificarCampo("id", valorParametro);
         if (!valorParametro.matches("\\d+")){
             throw new BusinessException("ID inválido, não é numerico!");
         }
