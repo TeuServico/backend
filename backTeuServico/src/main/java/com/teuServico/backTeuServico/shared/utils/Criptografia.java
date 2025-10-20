@@ -6,11 +6,29 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
+/**
+ * Classe utilitária responsável por criptografia e descriptografia utilizando o AES (Advanced Encryption Standard).
+ * <p>
+ * A chave secreta utilizada para criptografar e descriptografar os dados é a{@code SECRET_KEY}.
+ * Essa chave deve ter o tamanho de 16, 24 ou 32 bytes, isto é, 16, 24 ou 32 caracteres.
+ * <p>
+ * Os dados sap criptografados em Base64
+ */
+
 @Component
 public class Criptografia {
+    /** Algoritmo de criptografia utilizado. */
     private final String ALGORITHM = "AES";
+    /** Chave secreta obtida da variável de ambiente. */
     private final String SECRET_KEY = System.getenv("SECRET_KEY") ;
 
+    /**
+     * Criptografa o texto fornecido.
+     *
+     * @param texto Conteudo do tipo String a ser criptografado.
+     * @return Texto criptografado em Base64.
+     * @throws BusinessException Se ocorrer qualquer erro durante o processo de criptografia.
+     */
     public String criptografar(String texto)   {
         try {
             SecretKeySpec chave = new SecretKeySpec(SECRET_KEY.getBytes(), ALGORITHM);
@@ -23,6 +41,13 @@ public class Criptografia {
         }
     }
 
+    /**
+     * Descriptografa o conteudo do tipo String.
+     *
+     * @param textoCriptografado Texto criptografado e codificado em Base64.
+     * @return Texto descriptografado.
+     * @throws BusinessException Se ocorrer qualquer erro durante o processo de descriptografia.
+     */
     public String descriptografar(String textoCriptografado) {
         try {
             SecretKeySpec chave = new SecretKeySpec(SECRET_KEY.getBytes(), ALGORITHM);

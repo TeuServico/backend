@@ -16,22 +16,31 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.util.List;
 
+/**
+ * Classe responsável por tratar exceções de forma global na aplicação.
+ * Utiliza a anotação {@link RestControllerAdvice} para interceptar exceções lançadas pelos controllers
+ * e retornar respostas padronizadas em formato JSON.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+    /**
+     * Cria e retorna os headers padrão para respostas JSON.
+     * @return {@link HttpHeaders} com o tipo de conteúdo definido como {@link MediaType#APPLICATION_JSON}.
+     */
     private HttpHeaders defaultHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
 
-
-    private HttpHeaders headers() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
-    }
-
+    /**
+     * Cria um objeto {@link ResponseError}
+     *
+     * @param message Mensagem de erro a ser exibida.
+     * @param statusCode Código de status HTTP correspondente ao erro.
+     * @return Instância de {@link ResponseError} preenchida.
+     */
     private ResponseError responseError(String message, HttpStatus statusCode) {
         ResponseError responseError = new ResponseError();
         responseError.setStatus("error");
@@ -40,6 +49,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return responseError;
     }
 
+    /**
+     * Trata exceções genéricas não capturadas por handlers específicos.
+     * Se a exceção for do tipo {@link UndeclaredThrowableException}, delega para o handler de {@link BusinessException}.
+     * @param e Exceção lançada.
+     * @param request Contexto da requisição.
+     * @return {@link ResponseEntity} com os detalhes do erro.
+     */
     @ExceptionHandler(Exception.class)
     private ResponseEntity<Object> handleGeneral(Exception e, WebRequest request) {
         if (e instanceof UndeclaredThrowableException undeclared) {
@@ -47,16 +63,34 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         } else {
             String message = "Erro no servidor, não foi possível processar sua solicitação.";
             ResponseError error = responseError(message, HttpStatus.INTERNAL_SERVER_ERROR);
-            return handleExceptionInternal(e, error, headers(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+            return handleExceptionInternal(e, error, defaultHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
         }
     }
 
+    /**
+     * Trata exceções do tipo {@link BusinessException}, que representam erros de regra de negócio.
+     * @param e Exceção de negócio lançada.
+     * @param request Contexto da requisição.
+     * @return {@link ResponseEntity} com os detalhes do erro.
+     */
     @ExceptionHandler(BusinessException.class)
     private ResponseEntity<Object> handleBusinessException(BusinessException e, WebRequest request) {
         ResponseError error = responseError(e.getMessage(), HttpStatus.CONFLICT);
-        return handleExceptionInternal(e, error, headers(), HttpStatus.CONFLICT, request);
+        return handleExceptionInternal(e, error, defaultHeaders(), HttpStatus.CONFLICT, request);
     }
 
+    /**
+     * Trata erros de leitura da requisição, como campos mal formatados.
+     * E verifica se o erro está relacionado ao formato de data e ajusta a mensagem de erro.
+     * <P>caso contrario retorna:</P>
+     * Erro ao ler a requisição: verifique o formato dos campos enviados.
+     *
+     * @param ex Exceção lançada ao não conseguir ler a requisição.
+     * @param headers Cabeçalhos HTTP.
+     * @param status  Código de status HTTP.
+     * @param request Contexto da requisição.
+     * @return {@link ResponseEntity} com os detalhes do erro.
+     */
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex,
@@ -71,9 +105,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
         ResponseError error = responseError(message, HttpStatus.BAD_REQUEST);
-        return handleExceptionInternal(ex, error, headers(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptionInternal(ex, error, defaultHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
+    /**
+     * Trata erros de validação de argumentos nos métodos dos controllers.
+     * Extrai todas as mensagens de erro dos campos inválidos e as concatena em uma única string.
+     * @param ex Exceção lançada ao validar argumentos.
+     * @param headers Cabeçalhos HTTP.
+     * @param status  Código de status HTTP.
+     * @param request Contexto da requisição.
+     * @return {@link ResponseEntity} com os detalhes do erro.
+     */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
