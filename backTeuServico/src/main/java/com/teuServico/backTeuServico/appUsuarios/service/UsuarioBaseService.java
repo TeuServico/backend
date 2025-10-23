@@ -11,14 +11,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UsuarioBaseService {
-    private final CredenciaisUsuarioRepository credenciaisUsuarioRepository;
     private final ClienteRepository clienteRepository;
     private final ProfissionalRepository profissionalRepository;
     private final Criptografia criptografia;
     private final BaseService baseService;
 
-    public UsuarioBaseService(CredenciaisUsuarioRepository credenciaisUsuarioRepository, ClienteRepository clienteRepository, ProfissionalRepository profissionalRepository, Criptografia criptografia, BaseService baseService) {
-        this.credenciaisUsuarioRepository = credenciaisUsuarioRepository;
+    public UsuarioBaseService(ClienteRepository clienteRepository, ProfissionalRepository profissionalRepository, Criptografia criptografia, BaseService baseService) {
         this.clienteRepository = clienteRepository;
         this.profissionalRepository = profissionalRepository;
         this.criptografia = criptografia;
@@ -52,13 +50,10 @@ public class UsuarioBaseService {
         return usuarioBase;
     }
 
-    public void validarUnicidadeUsuario(String cpf, String email, String telefone) {
-        email = baseService.normalizarString(email);
+    public void validarUnicidadeInfoUsuario(String cpf, String telefone) {
         cpf = criptografia.criptografar(cpf);
         telefone = criptografia.criptografar(telefone);
-        if (credenciaisUsuarioRepository.findByEmail(email).isPresent()) {
-            throw new BusinessException("Email já cadastrado");
-        }else if (cpfJaCadastrado(cpf)) {
+       if (cpfJaCadastrado(cpf)) {
             throw new BusinessException("CPF já cadastrado");
         } else if (telefoneJaCadastrado(telefone)) {
             throw new BusinessException("Telefone já cadastrado");
