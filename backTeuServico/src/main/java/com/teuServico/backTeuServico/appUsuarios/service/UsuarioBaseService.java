@@ -7,7 +7,12 @@ import com.teuServico.backTeuServico.appUsuarios.repository.ProfissionalReposito
 import com.teuServico.backTeuServico.shared.exceptions.BusinessException;
 import com.teuServico.backTeuServico.shared.utils.Criptografia;
 import com.teuServico.backTeuServico.shared.utils.BaseService;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
 
 @Service
 public class UsuarioBaseService {
@@ -93,6 +98,14 @@ public class UsuarioBaseService {
         endereco.setCep(criptografia.descriptografar(endereco.getCep()));
 
         return usuarioBase;
+    }
+
+    public <T extends UsuarioBase, R, ID> R meuPerfil(UUID idCredencial, Function<UUID, Optional<T>> metodoDeBusca, Function<T,R> mapper) {
+        Optional<T> usuario = metodoDeBusca.apply(idCredencial);
+        if(usuario.isEmpty()){
+            throw new BusinessException("Não foram encontrdas informaçoes para esse usuario");
+        }
+        return mapper.apply(descriptografarUsuario(usuario.get()));
     }
 
 }

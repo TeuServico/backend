@@ -14,7 +14,6 @@ public class ClienteResponseDTO {
     private String telefone;
     private String cpf;
     private Endereco endereco;
-    private UUID idCredencial;
 
     public ClienteResponseDTO() {
     }
@@ -25,6 +24,5 @@ public class ClienteResponseDTO {
         this.telefone = cliente.getTelefone();
         this.cpf = cliente.getCpf();
         this.endereco = cliente.getEndereco();
-        this.idCredencial = cliente.getCredencialUsuario().getId();
     }
 }

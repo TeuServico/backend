@@ -1,5 +1,6 @@
 package com.teuServico.backTeuServico.appUsuarios.dto;
 
+import com.teuServico.backTeuServico.appUsuarios.model.Endereco;
 import com.teuServico.backTeuServico.appUsuarios.model.Profissional;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,10 +11,10 @@ import java.util.UUID;
 public class ProfissionalResponseDTO {
     private UUID id;
     private String nomeCompleto;
-    private String email;
     private String telefone;
+    private String cpf;
+    private Endereco endereco;
     private String profissao;
-    private UUID idCredencial;
 
     public ProfissionalResponseDTO() {
     }
@@ -21,9 +22,9 @@ public class ProfissionalResponseDTO {
     public ProfissionalResponseDTO(Profissional profissional) {
         this.id = profissional.getId();
         this.nomeCompleto = profissional.getNomeCompleto();
-        this.email = profissional.getCredencialUsuario().getEmail();
         this.telefone = profissional.getTelefone();
+        this.cpf = getCpf();
+        this.endereco = profissional.getEndereco();
         this.profissao = profissional.getProfissao();
-        this.idCredencial = profissional.getId();
     }
 }
