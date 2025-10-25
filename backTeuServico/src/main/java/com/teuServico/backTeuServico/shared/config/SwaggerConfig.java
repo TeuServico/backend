@@ -23,6 +23,8 @@ public class SwaggerConfig {
                                         .bearerFormat("JWT"))
                 .addResponses("FalhaNaRequisicao", new ApiResponse().description("Dados inválidos"))
                 .addResponses("Conflito", new ApiResponse().description("Exceção de negócio"))
-                .addResponses("ErroInterno", new ApiResponse().description("Erro interno do servidor")));
+                .addResponses("ErroInterno", new ApiResponse().description("Erro interno do servidor"))
+                .addResponses("NaoAutenticado", new ApiResponse().description("Credencias inválidas, token ausente, inválido ou expirado"))
+                .addResponses("NaoAutorizado", new ApiResponse().description("Usuário autenticado, mas sem permissão")));
     }
 }

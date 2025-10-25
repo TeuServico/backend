@@ -6,10 +6,9 @@ import com.teuServico.backTeuServico.appUsuarios.model.CredencialUsuario;
 import com.teuServico.backTeuServico.appUsuarios.model.enums.RoleEnum;
 import com.teuServico.backTeuServico.appUsuarios.repository.CredenciaisUsuarioRepository;
 import com.teuServico.backTeuServico.shared.exceptions.BusinessException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,11 +18,13 @@ import java.util.Optional;
 @Service
 public class CredenciaisUsuarioService {
     private final JwtEncoder jwtEncoder;
+    private final JwtDecoder jwtDecoder;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final CredenciaisUsuarioRepository credenciaisUsuarioRepository;
 
-    public CredenciaisUsuarioService(JwtEncoder jwtEncoder, BCryptPasswordEncoder bCryptPasswordEncoder, CredenciaisUsuarioRepository credenciaisUsuarioRepository) {
+    public CredenciaisUsuarioService(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder, BCryptPasswordEncoder bCryptPasswordEncoder, CredenciaisUsuarioRepository credenciaisUsuarioRepository) {
         this.jwtEncoder = jwtEncoder;
+        this.jwtDecoder = jwtDecoder;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.credenciaisUsuarioRepository = credenciaisUsuarioRepository;
     }
@@ -79,4 +80,43 @@ public class CredenciaisUsuarioService {
 
         return gerarTokenJWT(credencial);
     }
+
+    public String generateResetToken(String email) {
+        Instant now = Instant.now();
+        var expiresIn = 300L;
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .subject(email)
+                .claim("type", "reset-password")
+                .issuedAt(now)
+                .expiresAt(now.plusSeconds(expiresIn))
+                .build();
+        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+    }
+
+    public String validateResetToken(String token) {
+        try {
+            Jwt jwt = jwtDecoder.decode(token);
+            if (!"reset-password".equals(jwt.getClaim("type"))) {
+                throw new RuntimeException("Tipo de token inválido");
+            }
+            return jwt.getSubject();
+        } catch (JwtException e) {
+            throw new RuntimeException("Token inválido ou expirado");
+        }
+    }
+
+    public ResponseEntity<?> esquecerSenha(String email, String linkFrontParaRedefinirAsenha){
+        if(email.isBlank() || linkFrontParaRedefinirAsenha.isBlank()){
+            throw new BusinessException("email e linkFrontParaRedefinirAsenha não podem ser inválidos");
+        }
+        Optional<CredencialUsuario> credencialUsuario = credenciaisUsuarioRepository.findByEmail(email);
+        if(credencialUsuario.isEmpty()){
+            throw new BusinessException("Nenhum usuário com esse email foi encontrado");
+        }
+        String token = generateResetToken(email);
+        String link = linkFrontParaRedefinirAsenha+"?token="+token;
+
+        return ResponseEntity.ok("Email para redefinição de senha enviado, será expirado em 5 minutos");
+    }
+
 }

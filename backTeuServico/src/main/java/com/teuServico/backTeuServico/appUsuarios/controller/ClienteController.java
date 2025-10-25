@@ -31,8 +31,8 @@ public class ClienteController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Cliente criado com sucesso"),
             @ApiResponse(responseCode = "400", ref = "#/components/responses/FalhaNaRequisicao"),
-            @ApiResponse(responseCode = "409",ref = "#/components/responses/Conflito"),
-            @ApiResponse(responseCode = "500",ref = "#/components/responses/ErroInterno")
+            @ApiResponse(responseCode = "409", ref = "#/components/responses/Conflito"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/ErroInterno")
     })
     @PostMapping("criar")
     public TokenJWT criarCliente(@RequestBody @Valid CriarClienteDTO criarClienteDTO){
@@ -46,8 +46,10 @@ public class ClienteController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Dados do cliente retornados com sucesso"),
             @ApiResponse(responseCode = "400", ref = "#/components/responses/FalhaNaRequisicao"),
-            @ApiResponse(responseCode = "409",ref = "#/components/responses/Conflito"),
-            @ApiResponse(responseCode = "500",ref = "#/components/responses/ErroInterno")
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado"),
+            @ApiResponse(responseCode = "403", ref = "#/components/responses/NaoAutorizado"),
+            @ApiResponse(responseCode = "409", ref = "#/components/responses/Conflito"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/ErroInterno")
     })
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('CLIENTE')")

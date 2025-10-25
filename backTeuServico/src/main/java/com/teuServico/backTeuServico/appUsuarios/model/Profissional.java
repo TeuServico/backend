@@ -17,6 +17,8 @@ public class Profissional extends UsuarioBase {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column
+    private String sobreMim;
     @Column(nullable = false)
     private String profissao;
 
