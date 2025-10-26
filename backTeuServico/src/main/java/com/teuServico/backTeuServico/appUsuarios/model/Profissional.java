@@ -30,6 +30,7 @@ public class Profissional extends UsuarioBase {
         super.cpf = profissionalRequestDTO.getCpf();
         super.endereco = profissionalRequestDTO.getEndereco();
         super.credencialUsuario = credencialUsuario;
+        this.sobreMim = profissionalRequestDTO.getSobreMim();
         this.profissao = profissionalRequestDTO.getProfissao();
     }
 }
