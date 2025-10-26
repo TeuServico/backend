@@ -41,7 +41,8 @@ public class SecurityConfig {
         httpSecurity
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/tipoServico/buscar/**").permitAll()
+                        .requestMatchers("/tiposervico/buscar/**").permitAll()
+                        .requestMatchers("/ofertaservico/buscar/**").permitAll()
                         .requestMatchers("/cliente/criar").permitAll()
                         .requestMatchers("/profissional/criar").permitAll()
                         .requestMatchers("/credenciais/login").permitAll()
