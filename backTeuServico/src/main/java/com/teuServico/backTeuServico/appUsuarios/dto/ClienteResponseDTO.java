@@ -15,6 +15,9 @@ public class ClienteResponseDTO {
     @Schema(description = "Identificador único do cliente")
     private UUID id;
 
+    @Schema(description = "email do cliente", example = "joaosilva@gmail.com")
+    private String email;
+
     @Schema(description = "Nome completo do cliente", example = "joão da Silva")
     private String nomeCompleto;
 
@@ -32,6 +35,7 @@ public class ClienteResponseDTO {
 
     public ClienteResponseDTO(Cliente cliente) {
         this.id = cliente.getId();
+        this.email = cliente.getCredencialUsuario().getEmail();
         this.nomeCompleto = cliente.getNomeCompleto();
         this.telefone = cliente.getTelefone();
         this.cpf = cliente.getCpf();

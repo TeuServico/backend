@@ -15,6 +15,9 @@ public class ProfissionalResponseDTO {
     @Schema(description = "Identificador único do profissional", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
     private UUID id;
 
+    @Schema(description = "email do profissional", example = "rodrigosilva@gmail.com")
+    private String email;
+
     @Schema(description = "Nome completo do profissional", example = "rodrigo da Silva")
     private String nomeCompleto;
 
@@ -38,6 +41,7 @@ public class ProfissionalResponseDTO {
 
     public ProfissionalResponseDTO(Profissional profissional) {
         this.id = profissional.getId();
+        this.email = profissional.getCredencialUsuario().getEmail();
         this.nomeCompleto = profissional.getNomeCompleto();
         this.telefone = profissional.getTelefone();
         this.cpf = profissional.getCpf(); // Corrigido: era getCpf()

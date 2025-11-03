@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -26,6 +27,9 @@ public class OfertaServicoResponseDTO {
     @Schema(description = "Descrição da oferta de serviço", example = "Desenvolvimento de uma página web utilizando Java e React")
     private String descricao;
 
+    @Schema(description = "Tags de uma oferta de servico",example = "[\"Java\", \"Spring\", \"PostgreSQL\", \"React\", \"AWS S3\"]")
+    private List<String> tags;
+
     public OfertaServicoResponseDTO() {
     }
 
@@ -36,5 +40,6 @@ public class OfertaServicoResponseDTO {
         this.profissionalSobreMim = ofertaServico.getProfissional().getSobreMim();
         this.tipoServico = new TipoServicoResponseDTO(ofertaServico.getTipoServico());
         this.descricao = ofertaServico.getDescricao();
+        this.tags = ofertaServico.getTags();
     }
 }

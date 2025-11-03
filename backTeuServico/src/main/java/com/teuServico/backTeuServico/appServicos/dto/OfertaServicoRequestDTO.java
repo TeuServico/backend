@@ -2,10 +2,13 @@ package com.teuServico.backTeuServico.appServicos.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Schema(description = "Dados para criação de uma oferta de servico")
 @Getter
@@ -19,4 +22,8 @@ public class OfertaServicoRequestDTO {
     @Schema(description = "Descrição da oferta de serviço", example = "Desenvolvimento de uma página web utilizando Java e React")
     @NotBlank(message = "descricao é inválido")
     private String descricao;
+
+    @Schema(description = "Tags de uma oferta de servico",example = "[\"Java\", \"Spring\", \"PostgreSQL\", \"React\", \"AWS S3\"]")
+    @NotEmpty(message = "tags é inválido")
+    private List<String> tags;
 }

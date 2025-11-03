@@ -9,23 +9,20 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class AgendamentoRequestDTO {
-    @NotNull(message = "ofertaServicoId é inválido")
-    @Positive(message = "ofertaServicoId nao pode ser menor que 1")
-    private Long ofertaServicoId;
+public class ContraOfertaRequestDTO {
+
+    @NotBlank(message = "idDoAgendamento é inválido")
+    private String idDoAgendamento;
 
     @NotNull(message = "dataEntrega é inválido")
     @Future(message = "dataEntrega deve ser uma data futura.")
-    private LocalDate dataEntrega;
-
-    @NotBlank(message = "observacoes é inválido")
-    private String observacoes;
+    private LocalDateTime dataEntrega;
 
     @NotNull(message = "precoDesejado é inválido")
     @Positive(message = "precoDesejado nao pode ser menor que 1")
     private BigDecimal precoDesejado;
-
 }
