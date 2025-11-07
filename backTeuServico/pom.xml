@@ -64,6 +64,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Suporte a arquivo .env com Spring Boot -->
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>dotenv-java</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
 		<!--AWS service S3-->
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>

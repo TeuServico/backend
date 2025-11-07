@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Arquivos sensíveis - NUNCA commitar ###
+.env
+*.key
+*.pem
+*.p12
+*.jks
+**/secrets/**
+**/credentials/**

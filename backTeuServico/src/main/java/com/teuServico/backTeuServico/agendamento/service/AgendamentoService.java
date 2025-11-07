@@ -14,7 +14,7 @@ import com.teuServico.backTeuServico.shared.exceptions.BusinessException;
 import com.teuServico.backTeuServico.shared.utils.BaseService;
 import com.teuServico.backTeuServico.shared.utils.Paginacao;
 import com.teuServico.backTeuServico.shared.utils.PaginacaoResponseDTO;
-import com.teuServico.backTeuServico.shared.utils.email.EmailService;
+//import com.teuServico.backTeuServico.shared.utils.email.EmailService;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -30,16 +30,16 @@ public class AgendamentoService {
     private final ClienteRepository clienteRepository;
     private final Paginacao paginacao;
     private final BaseService baseService;
-    private final EmailService emailService;
+//    private final EmailService emailService;
 
-    public AgendamentoService(AgendamentoRepository agendamentoRepository, OfertaServicoRepository ofertaServicoRepository, ProfissionalRepository profissionalRepository, ClienteRepository clienteRepository, Paginacao paginacao, BaseService baseService, EmailService emailService) {
+    public AgendamentoService(AgendamentoRepository agendamentoRepository, OfertaServicoRepository ofertaServicoRepository, ProfissionalRepository profissionalRepository, ClienteRepository clienteRepository, Paginacao paginacao, BaseService baseService) {
         this.agendamentoRepository = agendamentoRepository;
         this.ofertaServicoRepository = ofertaServicoRepository;
         this.profissionalRepository = profissionalRepository;
         this.clienteRepository = clienteRepository;
         this.paginacao = paginacao;
         this.baseService = baseService;
-        this.emailService = emailService;
+//        this.emailService = emailService;
     }
 
     private Cliente buscarClientePorToken(JwtAuthenticationToken token){

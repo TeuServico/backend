@@ -3,11 +3,19 @@ package com.teuServico.backTeuServico;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 @SpringBootApplication
 public class BackTeuServicoApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(BackTeuServicoApplication.class, args);
-	}
+    public static void main(String[] args) {
+        // Carregar variáveis de ambiente do .env antes do Spring inicializar
+        Dotenv.configure()
+                .ignoreIfMissing()
+                .systemProperties()
+                .load();
+
+        SpringApplication.run(BackTeuServicoApplication.class, args);
+    }
 
 }
