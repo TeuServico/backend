@@ -13,7 +13,7 @@ public class TipoServicoRequestDTO {
 
     @Schema(description = "Nome do tipo de serviço", example = "Desenvolver página web")
     @NotBlank(message = "nome é inválido")
-    @Size(max = 30, message = "nome deve ter no máximo 30 caracteres")
+    @Size(max = 100, message = "nome deve ter no máximo 100 caracteres")
     private String nome;
 
     @Schema(description = "Categoria do serviço", example = "PROGRAMAÇÃO")

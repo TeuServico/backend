@@ -55,7 +55,7 @@ public class AgendamentoController {
     })
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('CLIENTE')")
-    @GetMapping("meusagendamentos")
+    @GetMapping("meusagendamentos/cliente")
     public PaginacaoResponseDTO<AgendamentoResponseDTO> meusAgendamentosCliente(String pagina, String qtdMaximaElementos, JwtAuthenticationToken token){
         return agendamentoService.meusAgendamentosCliente(pagina, qtdMaximaElementos, token);
     }
@@ -74,7 +74,7 @@ public class AgendamentoController {
     })
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('PROFISSIONAL')")
-    @GetMapping("meusagendamentos")
+    @GetMapping("meusagendamentos/profissional")
     public PaginacaoResponseDTO<AgendamentoResponseDTO> meusAgendamentosProfissional(String pagina, String qtdMaximaElementos, JwtAuthenticationToken token){
         return agendamentoService.meusAgendamentosProfissional(pagina, qtdMaximaElementos, token);
     }
