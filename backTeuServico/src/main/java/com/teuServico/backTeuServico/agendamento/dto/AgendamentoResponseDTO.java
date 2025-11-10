@@ -14,7 +14,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class AgendamentoResponseDTO {
-    private OfertaServicoResponseDTO ofertaServicoResponseDTO;
     private UUID id;
     private LocalDate dataEntrega;
     private StatusEnum status;
@@ -22,6 +21,7 @@ public class AgendamentoResponseDTO {
     private BigDecimal precoDesejado;
     private boolean temContraOferta;
     private ContraOferta contraOferta;
+    private OfertaServicoResponseDTO ofertaServicoResponseDTO;
     public AgendamentoResponseDTO() {
     }
 
