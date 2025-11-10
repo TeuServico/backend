@@ -1,5 +1,6 @@
 package com.teuServico.backTeuServico.agendamento.model;
 
+import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,7 +9,8 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
+@Embeddable
 public class ContraOferta {
-    private LocalDate ContraOfertaDataDeEntrega;
-    private BigDecimal ContraOfertaPrecoDesejado;
+    private LocalDate contraOfertaDataDeEntrega;
+    private BigDecimal contraOfertaPrecoDesejado;
 }

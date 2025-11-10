@@ -4,6 +4,7 @@ import com.teuServico.backTeuServico.agendamento.dto.AgendamentoRequestDTO;
 import com.teuServico.backTeuServico.agendamento.dto.AgendamentoResponseDTO;
 import com.teuServico.backTeuServico.agendamento.dto.ContraOfertaRequestDTO;
 import com.teuServico.backTeuServico.agendamento.model.Agendamento;
+import com.teuServico.backTeuServico.agendamento.model.ContraOferta;
 import com.teuServico.backTeuServico.agendamento.model.enums.StatusEnum;
 import com.teuServico.backTeuServico.agendamento.repository.AgendamentoRepository;
 import com.teuServico.backTeuServico.appServicos.model.OfertaServico;
@@ -75,6 +76,12 @@ public class AgendamentoService {
         }
     }
 
+    private void verificarSeAgendamentoEstaEmAndamento(Agendamento agendamento){
+        if(agendamento.getStatus().equals(StatusEnum.EM_ANDAMENTO)){
+            throw new BusinessException("Solitação negada, agendamento está em andamento");
+        }
+    }
+
     public AgendamentoResponseDTO solicitarAgendamento(AgendamentoRequestDTO agendamentoRequestDTO, JwtAuthenticationToken token){
         Cliente cliente = baseService.buscarClientePorTokenJWT(token);
         OfertaServico ofertaServico = buscarOfertaServico(agendamentoRequestDTO.getOfertaServicoId());
@@ -112,6 +119,15 @@ public class AgendamentoService {
         Agendamento agendamento = buscarAgendamentoPorId(idAgendamento);
         verificarSeAgendamentoEstaCancelado(agendamento);
         verificarSeAgendamentoPertenceAprofissional(agendamento, profissional);
+        if (agendamento.getStatus().equals(StatusEnum.EM_ANDAMENTO)) {
+            throw new BusinessException("Você já aceitou esse agendamento");
+        }
+        if(agendamento.getContraOferta() != null){
+            agendamento.getContraOferta().setContraOfertaDataDeEntrega(null);
+            agendamento.getContraOferta().setContraOfertaPrecoDesejado(null);
+            agendamento.setContraOferta(null);
+            agendamento.setTemContraOferta(false);
+        }
         agendamento.setStatus(StatusEnum.EM_ANDAMENTO);
         agendamentoRepository.save(agendamento);
         return ResponseEntity.ok("Agendamento aceito com sucesso, por favor faça a entrega do serviço dentro do prazo");
@@ -122,7 +138,12 @@ public class AgendamentoService {
         Agendamento agendamento = buscarAgendamentoPorId(contraOfertaRequestDTO.getIdDoAgendamento());
         verificarSeAgendamentoEstaCancelado(agendamento);
         verificarSeAgendamentoPertenceAprofissional(agendamento, profissional);
-
+        verificarSeAgendamentoEstaEmAndamento(agendamento);
+        if (agendamento.getContraOferta() != null) {
+            throw new BusinessException("Este agendamento já possui uma contra oferta");
+        }
+        agendamento.setContraOferta(new ContraOferta());
+        agendamento.setTemContraOferta(true);
         agendamento.getContraOferta().setContraOfertaDataDeEntrega(contraOfertaRequestDTO.getDataEntrega());
         agendamento.getContraOferta().setContraOfertaPrecoDesejado(contraOfertaRequestDTO.getPrecoDesejado());
         agendamento.setStatus(StatusEnum.AGUARDANDO_CONFIRMACAO_CLIENTE);
@@ -135,11 +156,16 @@ public class AgendamentoService {
         Agendamento agendamento = buscarAgendamentoPorId(idAgendamento);
         verificarSeAgendamentoEstaCancelado(agendamento);
         verificarSeAgendamentoPertenceAcliente(agendamento, cliente);
+        verificarSeAgendamentoEstaEmAndamento(agendamento);
         if (!agendamento.isTemContraOferta()){
             throw new BusinessException("Esse agendamento não possui uma contraproposta");
         }
         agendamento.setDataDeEntrega(agendamento.getContraOferta().getContraOfertaDataDeEntrega());
         agendamento.setPrecoDesejado(agendamento.getContraOferta().getContraOfertaPrecoDesejado());
+        agendamento.getContraOferta().setContraOfertaDataDeEntrega(null);
+        agendamento.getContraOferta().setContraOfertaPrecoDesejado(null);
+        agendamento.setContraOferta(null);
+        agendamento.setTemContraOferta(false);
         agendamento.setStatus(StatusEnum.EM_ANDAMENTO);
         agendamentoRepository.save(agendamento);
         return ResponseEntity.ok("Você aceitou a contra-proposta oferecida pelo profissional, aguarde até a conclusão do serviço");
