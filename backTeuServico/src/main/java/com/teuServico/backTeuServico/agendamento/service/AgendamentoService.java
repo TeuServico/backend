@@ -2,7 +2,9 @@ package com.teuServico.backTeuServico.agendamento.service;
 
 import com.teuServico.backTeuServico.agendamento.dto.AgendamentoRequestDTO;
 import com.teuServico.backTeuServico.agendamento.dto.AgendamentoResponseDTO;
+import com.teuServico.backTeuServico.agendamento.dto.ContraOfertaRequestDTO;
 import com.teuServico.backTeuServico.agendamento.model.Agendamento;
+import com.teuServico.backTeuServico.agendamento.model.enums.StatusEnum;
 import com.teuServico.backTeuServico.agendamento.repository.AgendamentoRepository;
 import com.teuServico.backTeuServico.appServicos.model.OfertaServico;
 import com.teuServico.backTeuServico.appServicos.repository.OfertaServicoRepository;
@@ -14,13 +16,14 @@ import com.teuServico.backTeuServico.shared.exceptions.BusinessException;
 import com.teuServico.backTeuServico.shared.utils.BaseService;
 import com.teuServico.backTeuServico.shared.utils.Paginacao;
 import com.teuServico.backTeuServico.shared.utils.PaginacaoResponseDTO;
-//import com.teuServico.backTeuServico.shared.utils.email.EmailService;
+import com.teuServico.backTeuServico.shared.utils.email.EmailService;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AgendamentoService {
@@ -30,34 +33,16 @@ public class AgendamentoService {
     private final ClienteRepository clienteRepository;
     private final Paginacao paginacao;
     private final BaseService baseService;
-//    private final EmailService emailService;
+    private final EmailService emailService;
 
-    public AgendamentoService(AgendamentoRepository agendamentoRepository, OfertaServicoRepository ofertaServicoRepository, ProfissionalRepository profissionalRepository, ClienteRepository clienteRepository, Paginacao paginacao, BaseService baseService) {
+    public AgendamentoService(AgendamentoRepository agendamentoRepository, OfertaServicoRepository ofertaServicoRepository, ProfissionalRepository profissionalRepository, ClienteRepository clienteRepository, Paginacao paginacao, BaseService baseService, EmailService emailService) {
         this.agendamentoRepository = agendamentoRepository;
         this.ofertaServicoRepository = ofertaServicoRepository;
         this.profissionalRepository = profissionalRepository;
         this.clienteRepository = clienteRepository;
         this.paginacao = paginacao;
         this.baseService = baseService;
-//        this.emailService = emailService;
-    }
-
-    private Cliente buscarClientePorToken(JwtAuthenticationToken token){
-        UUID idCredencial = UUID.fromString(token.getName());
-        Optional<Cliente> cliente = clienteRepository.findByCredencialUsuario_Id(idCredencial);
-        if (cliente.isEmpty()){
-            throw new BusinessException("Esse cliente nao foi encontrado");
-        }
-        return cliente.get();
-    }
-
-    private Profissional buscarProfissionalPorToken(JwtAuthenticationToken token){
-        UUID idCredencial = UUID.fromString(token.getName());
-        Optional<Profissional> profissional = profissionalRepository.findByCredencialUsuario_Id(idCredencial);
-        if (profissional.isEmpty()){
-            throw new BusinessException("Esse profissional nao foi encontrado");
-        }
-        return profissional.get();
+        this.emailService = emailService;
     }
 
     private OfertaServico buscarOfertaServico(long idOfertaServico){
@@ -68,8 +53,30 @@ public class AgendamentoService {
         return ofertaServico.get();
     }
 
+    private Agendamento buscarAgendamentoPorId(String idAgendamento){
+        return agendamentoRepository.findById(baseService.validarUUID(idAgendamento)).orElseThrow(() -> new BusinessException("Agendamento não foi encontrado"));
+    }
+
+    private void verificarSeAgendamentoPertenceAprofissional(Agendamento agendamento, Profissional profissional){
+        if (!agendamento.getOfertaServico().getProfissional().getId().equals(profissional.getId())) {
+            throw new BusinessException("Você não pode fazer operacoes sobre um agendamento que não lhe pertence");
+        }
+    }
+
+    private void verificarSeAgendamentoPertenceAcliente(Agendamento agendamento, Cliente cliente){
+        if (!agendamento.getCliente().getId().equals(cliente.getId())) {
+            throw new BusinessException("Você não pode fazer operacoes sobre um agendamento que não lhe pertence");
+        }
+    }
+
+    private void verificarSeAgendamentoEstaCancelado(Agendamento agendamento){
+        if(agendamento.getStatus().equals(StatusEnum.CANCELADO)){
+            throw new BusinessException("Não é possivel interagir com um agendamento que foi cancelado");
+        }
+    }
+
     public AgendamentoResponseDTO solicitarAgendamento(AgendamentoRequestDTO agendamentoRequestDTO, JwtAuthenticationToken token){
-        Cliente cliente = buscarClientePorToken(token);
+        Cliente cliente = baseService.buscarClientePorTokenJWT(token);
         OfertaServico ofertaServico = buscarOfertaServico(agendamentoRequestDTO.getOfertaServicoId());
         Agendamento agendamento = new Agendamento(agendamentoRequestDTO, cliente, ofertaServico);
         agendamentoRepository.save(agendamento);
@@ -78,7 +85,7 @@ public class AgendamentoService {
 
     public PaginacaoResponseDTO<AgendamentoResponseDTO> meusAgendamentosCliente(String pagina, String qtdMaximaElementos, JwtAuthenticationToken token){
         baseService.verificarCampo("qtdMaximaElementos", qtdMaximaElementos);
-        Cliente cliente = buscarClientePorToken(token);
+        Cliente cliente = baseService.buscarClientePorTokenJWT(token);
         return paginacao.listarPor(
                 baseService.extrairNumeroPaginaValido(pagina),
                 baseService.transformarEmNumeroInt(qtdMaximaElementos, "qtdMaximaElementos é inválido"),
@@ -90,7 +97,7 @@ public class AgendamentoService {
 
     public PaginacaoResponseDTO<AgendamentoResponseDTO> meusAgendamentosProfissional(String pagina, String qtdMaximaElementos, JwtAuthenticationToken token){
         baseService.verificarCampo("qtdMaximaElementos", qtdMaximaElementos);
-        Profissional profissional = buscarProfissionalPorToken(token);
+        Profissional profissional = baseService.buscarProfissionalPorTokenJWT(token);
         return paginacao.listarPor(
                 baseService.extrairNumeroPaginaValido(pagina),
                 baseService.transformarEmNumeroInt(qtdMaximaElementos, "qtdMaximaElementos é inválido"),
@@ -98,6 +105,64 @@ public class AgendamentoService {
                 agendamento -> new AgendamentoResponseDTO(agendamento),
                 Sort.by("status")
         );
+    }
+
+    public ResponseEntity<String> profissionalAceitarAgendamento(String idAgendamento, JwtAuthenticationToken token) {
+        Profissional profissional = baseService.buscarProfissionalPorTokenJWT(token);
+        Agendamento agendamento = buscarAgendamentoPorId(idAgendamento);
+        verificarSeAgendamentoEstaCancelado(agendamento);
+        verificarSeAgendamentoPertenceAprofissional(agendamento, profissional);
+        agendamento.setStatus(StatusEnum.EM_ANDAMENTO);
+        agendamentoRepository.save(agendamento);
+        return ResponseEntity.ok("Agendamento aceito com sucesso, por favor faça a entrega do serviço dentro do prazo");
+    }
+
+    public ResponseEntity<String> profissionalFazerContraOferta(ContraOfertaRequestDTO contraOfertaRequestDTO, JwtAuthenticationToken token){
+        Profissional profissional = baseService.buscarProfissionalPorTokenJWT(token);
+        Agendamento agendamento = buscarAgendamentoPorId(contraOfertaRequestDTO.getIdDoAgendamento());
+        verificarSeAgendamentoEstaCancelado(agendamento);
+        verificarSeAgendamentoPertenceAprofissional(agendamento, profissional);
+
+        agendamento.getContraOferta().setContraOfertaDataDeEntrega(contraOfertaRequestDTO.getDataEntrega());
+        agendamento.getContraOferta().setContraOfertaPrecoDesejado(contraOfertaRequestDTO.getPrecoDesejado());
+        agendamento.setStatus(StatusEnum.AGUARDANDO_CONFIRMACAO_CLIENTE);
+        agendamentoRepository.save(agendamento);
+        return ResponseEntity.ok("Contra-proposta enviada com sucesso, aguarde a resposta do cliente");
+    }
+
+    public ResponseEntity<String> clienteAceitarAgendamentoContraOferta(String idAgendamento, JwtAuthenticationToken token){
+        Cliente cliente = baseService.buscarClientePorTokenJWT(token);
+        Agendamento agendamento = buscarAgendamentoPorId(idAgendamento);
+        verificarSeAgendamentoEstaCancelado(agendamento);
+        verificarSeAgendamentoPertenceAcliente(agendamento, cliente);
+        if (!agendamento.isTemContraOferta()){
+            throw new BusinessException("Esse agendamento não possui uma contraproposta");
+        }
+        agendamento.setDataDeEntrega(agendamento.getContraOferta().getContraOfertaDataDeEntrega());
+        agendamento.setPrecoDesejado(agendamento.getContraOferta().getContraOfertaPrecoDesejado());
+        agendamento.setStatus(StatusEnum.EM_ANDAMENTO);
+        agendamentoRepository.save(agendamento);
+        return ResponseEntity.ok("Você aceitou a contra-proposta oferecida pelo profissional, aguarde até a conclusão do serviço");
+    }
+
+    public ResponseEntity<String> clienteCancelarAgendamento(String idAgendamento, JwtAuthenticationToken token){
+        Cliente cliente = baseService.buscarClientePorTokenJWT(token);
+        Agendamento agendamento = buscarAgendamentoPorId(idAgendamento);
+        verificarSeAgendamentoEstaCancelado(agendamento);
+        verificarSeAgendamentoPertenceAcliente(agendamento, cliente);
+        agendamento.setStatus(StatusEnum.CANCELADO);
+        agendamentoRepository.save(agendamento);
+        return ResponseEntity.ok("Agendamento cancelado com sucesso");
+    }
+
+    public ResponseEntity<String> profissionalCancelarAgendamento(String idAgendamento, JwtAuthenticationToken token){
+        Profissional profissional = baseService.buscarProfissionalPorTokenJWT(token);
+        Agendamento agendamento = buscarAgendamentoPorId(idAgendamento);
+        verificarSeAgendamentoEstaCancelado(agendamento);
+        verificarSeAgendamentoPertenceAprofissional(agendamento, profissional);
+        agendamento.setStatus(StatusEnum.CANCELADO);
+        agendamentoRepository.save(agendamento);
+        return ResponseEntity.ok("Agendamento cancelado com sucesso");
     }
 
 }

@@ -9,7 +9,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -20,7 +19,7 @@ public class ContraOfertaRequestDTO {
 
     @NotNull(message = "dataEntrega é inválido")
     @Future(message = "dataEntrega deve ser uma data futura.")
-    private LocalDateTime dataEntrega;
+    private LocalDate dataEntrega;
 
     @NotNull(message = "precoDesejado é inválido")
     @Positive(message = "precoDesejado nao pode ser menor que 1")

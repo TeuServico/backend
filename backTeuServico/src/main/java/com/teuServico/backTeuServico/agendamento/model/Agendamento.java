@@ -52,12 +52,6 @@ public class Agendamento {
     private BigDecimal precoDesejado;
 
     @Column
-    private boolean clienteAceitou;
-
-    @Column
-    private boolean profissionalAceitou;
-
-    @Column
     private boolean temContraOferta;
 
     @Embedded
@@ -76,8 +70,6 @@ public class Agendamento {
     @PrePersist
     protected void aocriar() {
         this.dataSolicitacao = LocalDate.now();
-        this.clienteAceitou = true;
-        this.profissionalAceitou = false;
         if (this.status == null) {
             this.status = StatusEnum.AGUARDANDO_CONFIRMACAO_PROFISSIONAL;
         }

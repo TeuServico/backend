@@ -2,6 +2,8 @@ package com.teuServico.backTeuServico.agendamento.controller;
 
 import com.teuServico.backTeuServico.agendamento.dto.AgendamentoRequestDTO;
 import com.teuServico.backTeuServico.agendamento.dto.AgendamentoResponseDTO;
+import com.teuServico.backTeuServico.agendamento.dto.ContraOfertaRequestDTO;
+import com.teuServico.backTeuServico.agendamento.model.ContraOferta;
 import com.teuServico.backTeuServico.agendamento.service.AgendamentoService;
 import com.teuServico.backTeuServico.shared.utils.PaginacaoResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +39,7 @@ public class AgendamentoController {
     })
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('CLIENTE')")
-    @PostMapping("solicitar")
+    @PostMapping("cliente/solicitar")
     public AgendamentoResponseDTO solicitarAgendamento(@Valid @RequestBody AgendamentoRequestDTO agendamentoRequestDTO, JwtAuthenticationToken token){
         return agendamentoService.solicitarAgendamento(agendamentoRequestDTO, token);
     }
@@ -46,7 +49,7 @@ public class AgendamentoController {
             description = "Permite a um cliente(atraves de seu token de autenticação) obter todos os seus agendamentos"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Agendamento solicitado com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Busca realizada com sucesso"),
             @ApiResponse(responseCode = "400", ref = "#/components/responses/FalhaNaRequisicao"),
             @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado"),
             @ApiResponse(responseCode = "403", ref = "#/components/responses/NaoAutorizado"),
@@ -55,8 +58,8 @@ public class AgendamentoController {
     })
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('CLIENTE')")
-    @GetMapping("meusagendamentos/cliente")
-    public PaginacaoResponseDTO<AgendamentoResponseDTO> meusAgendamentosCliente(String pagina, String qtdMaximaElementos, JwtAuthenticationToken token){
+    @GetMapping("cliente/meusagendamentos")
+    public PaginacaoResponseDTO<AgendamentoResponseDTO> meusAgendamentosCliente(@RequestParam String pagina, @RequestParam String qtdMaximaElementos, JwtAuthenticationToken token){
         return agendamentoService.meusAgendamentosCliente(pagina, qtdMaximaElementos, token);
     }
 
@@ -65,7 +68,7 @@ public class AgendamentoController {
             description = "Permite a um profissional(atraves de seu token de autenticação) obter todos os seus agendamentos"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Agendamento solicitado com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Busca realizada com sucesso"),
             @ApiResponse(responseCode = "400", ref = "#/components/responses/FalhaNaRequisicao"),
             @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado"),
             @ApiResponse(responseCode = "403", ref = "#/components/responses/NaoAutorizado"),
@@ -74,9 +77,104 @@ public class AgendamentoController {
     })
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('PROFISSIONAL')")
-    @GetMapping("meusagendamentos/profissional")
-    public PaginacaoResponseDTO<AgendamentoResponseDTO> meusAgendamentosProfissional(String pagina, String qtdMaximaElementos, JwtAuthenticationToken token){
+    @GetMapping("profissional/meusagendamentos")
+    public PaginacaoResponseDTO<AgendamentoResponseDTO> meusAgendamentosProfissional(@RequestParam String pagina, @RequestParam String qtdMaximaElementos, JwtAuthenticationToken token){
         return agendamentoService.meusAgendamentosProfissional(pagina, qtdMaximaElementos, token);
+    }
+
+    @Operation(
+            summary = "Aceitar agendamento solicitado pelo cliente",
+            description = "Permite a um profissional(atraves de seu token de autenticação) aceitar o agendamento feito por um cliente"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Agendamento aceito com sucesso"),
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/FalhaNaRequisicao"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado"),
+            @ApiResponse(responseCode = "403", ref = "#/components/responses/NaoAutorizado"),
+            @ApiResponse(responseCode = "409", ref = "#/components/responses/Conflito"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/ErroInterno")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAuthority('PROFISSIONAL')")
+    @PostMapping("profissional/aceitar")
+    public ResponseEntity<String> profissionalAceitarAgendamento(@RequestParam String idAgendamento, JwtAuthenticationToken token){
+        return agendamentoService.profissionalAceitarAgendamento(idAgendamento, token);
+    }
+
+    @Operation(
+            summary = "Faz uma contra oferta de agendamento",
+            description = "Permite a um profissional(atraves de seu token de autenticação) fazer uma contra oferta para um agendamento feito por um cliente"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contra oferta de agendamento feita com sucesso"),
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/FalhaNaRequisicao"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado"),
+            @ApiResponse(responseCode = "403", ref = "#/components/responses/NaoAutorizado"),
+            @ApiResponse(responseCode = "409", ref = "#/components/responses/Conflito"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/ErroInterno")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAuthority('PROFISSIONAL')")
+    @PostMapping("profissional/fazer/contraoferta")
+    public ResponseEntity<String> profissionalFazerContraOferta(@RequestBody @Valid ContraOfertaRequestDTO contraOfertaRequestDTO, JwtAuthenticationToken token){
+        return agendamentoService.profissionalFazerContraOferta(contraOfertaRequestDTO, token);
+    }
+
+    @Operation(
+            summary = "Aceitar contra oferta de agendamento solicitada pelo profissional",
+            description = "Permite a um cliente(atraves de seu token de autenticação) aceitar o a contra oferta de agendamento feita por um profissional"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contra oferta de agendamento aceita com sucesso"),
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/FalhaNaRequisicao"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado"),
+            @ApiResponse(responseCode = "403", ref = "#/components/responses/NaoAutorizado"),
+            @ApiResponse(responseCode = "409", ref = "#/components/responses/Conflito"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/ErroInterno")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAuthority('CLIENTE')")
+    @PostMapping("cliente/aceitar/contraoferta")
+    public ResponseEntity<String> clienteAceitarContraOferta(@RequestParam String idAgendamento, JwtAuthenticationToken token){
+        return agendamentoService.clienteAceitarAgendamentoContraOferta(idAgendamento, token);
+    }
+
+    @Operation(
+            summary = "Cliente cancela agendamento",
+            description = "Permite a um cliente(atraves de seu token de autenticação) cancelar um agendamento"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Agendamento cancelado com sucesso"),
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/FalhaNaRequisicao"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado"),
+            @ApiResponse(responseCode = "403", ref = "#/components/responses/NaoAutorizado"),
+            @ApiResponse(responseCode = "409", ref = "#/components/responses/Conflito"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/ErroInterno")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAuthority('CLIENTE')")
+    @PostMapping("cliente/cancelar")
+    public ResponseEntity<String> clienteCancelarAgendamento(@RequestParam String idAgendamento, JwtAuthenticationToken token){
+        return agendamentoService.clienteCancelarAgendamento(idAgendamento, token);
+    }
+
+    @Operation(
+            summary = "Profissional cancela agendamento",
+            description = "Permite a um profissional(atraves de seu token de autenticação) cancelar um agendamento"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Agendamento cancelado com sucesso"),
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/FalhaNaRequisicao"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado"),
+            @ApiResponse(responseCode = "403", ref = "#/components/responses/NaoAutorizado"),
+            @ApiResponse(responseCode = "409", ref = "#/components/responses/Conflito"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/ErroInterno")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAuthority('PROFISSIONAL')")
+    @PostMapping("profissional/cancelar")
+    public ResponseEntity<String> profissionalCancelarAgendamento(@RequestParam String idAgendamento, JwtAuthenticationToken token){
+        return agendamentoService.profissionalCancelarAgendamento(idAgendamento, token);
     }
 
 }
