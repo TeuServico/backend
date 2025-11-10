@@ -3,7 +3,6 @@ package com.teuServico.backTeuServico.agendamento.controller;
 import com.teuServico.backTeuServico.agendamento.dto.AgendamentoRequestDTO;
 import com.teuServico.backTeuServico.agendamento.dto.AgendamentoResponseDTO;
 import com.teuServico.backTeuServico.agendamento.dto.ContraOfertaRequestDTO;
-import com.teuServico.backTeuServico.agendamento.model.ContraOferta;
 import com.teuServico.backTeuServico.agendamento.service.AgendamentoService;
 import com.teuServico.backTeuServico.shared.utils.PaginacaoResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -175,6 +174,25 @@ public class AgendamentoController {
     @PostMapping("profissional/cancelar")
     public ResponseEntity<String> profissionalCancelarAgendamento(@RequestParam String idAgendamento, JwtAuthenticationToken token){
         return agendamentoService.profissionalCancelarAgendamento(idAgendamento, token);
+    }
+
+    @Operation(
+            summary = "Profissional conclui o agendamento",
+            description = "Permite a um profissional(atraves de seu token de autenticação) concluir o agendamento"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Agendamento concluido com sucesso"),
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/FalhaNaRequisicao"),
+            @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado"),
+            @ApiResponse(responseCode = "403", ref = "#/components/responses/NaoAutorizado"),
+            @ApiResponse(responseCode = "409", ref = "#/components/responses/Conflito"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/ErroInterno")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAuthority('PROFISSIONAL')")
+    @PostMapping("profissional/concluir")
+    public ResponseEntity<String> profissionalConcluirAgendamento(@RequestParam String idAgendamento, JwtAuthenticationToken token){
+        return agendamentoService.profissionalConcluirAgendamento(idAgendamento, token);
     }
 
 }

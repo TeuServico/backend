@@ -11,8 +11,6 @@ import com.teuServico.backTeuServico.appServicos.model.OfertaServico;
 import com.teuServico.backTeuServico.appServicos.repository.OfertaServicoRepository;
 import com.teuServico.backTeuServico.appUsuarios.model.Cliente;
 import com.teuServico.backTeuServico.appUsuarios.model.Profissional;
-import com.teuServico.backTeuServico.appUsuarios.repository.ClienteRepository;
-import com.teuServico.backTeuServico.appUsuarios.repository.ProfissionalRepository;
 import com.teuServico.backTeuServico.shared.exceptions.BusinessException;
 import com.teuServico.backTeuServico.shared.utils.BaseService;
 import com.teuServico.backTeuServico.shared.utils.Paginacao;
@@ -30,17 +28,13 @@ import java.util.Optional;
 public class AgendamentoService {
     private final AgendamentoRepository agendamentoRepository;
     private final OfertaServicoRepository ofertaServicoRepository;
-    private final ProfissionalRepository profissionalRepository;
-    private final ClienteRepository clienteRepository;
     private final Paginacao paginacao;
     private final BaseService baseService;
     private final EmailService emailService;
 
-    public AgendamentoService(AgendamentoRepository agendamentoRepository, OfertaServicoRepository ofertaServicoRepository, ProfissionalRepository profissionalRepository, ClienteRepository clienteRepository, Paginacao paginacao, BaseService baseService, EmailService emailService) {
+    public AgendamentoService(AgendamentoRepository agendamentoRepository, OfertaServicoRepository ofertaServicoRepository, Paginacao paginacao, BaseService baseService, EmailService emailService) {
         this.agendamentoRepository = agendamentoRepository;
         this.ofertaServicoRepository = ofertaServicoRepository;
-        this.profissionalRepository = profissionalRepository;
-        this.clienteRepository = clienteRepository;
         this.paginacao = paginacao;
         this.baseService = baseService;
         this.emailService = emailService;
@@ -82,11 +76,26 @@ public class AgendamentoService {
         }
     }
 
+    private void removerContraOferta(Agendamento agendamento) {
+        ContraOferta contraOferta = agendamento.getContraOferta();
+        if (contraOferta != null) {
+            contraOferta.setContraOfertaDataDeEntrega(null);
+            contraOferta.setContraOfertaPrecoDesejado(null);
+            agendamento.setContraOferta(null);
+            agendamento.setTemContraOferta(false);
+        }
+    }
+
+    private void notificarClienteEprofissionalViaEmail(Agendamento agendamento){
+        emailService.notificarClienteEprofissional(agendamento);
+    }
+
     public AgendamentoResponseDTO solicitarAgendamento(AgendamentoRequestDTO agendamentoRequestDTO, JwtAuthenticationToken token){
         Cliente cliente = baseService.buscarClientePorTokenJWT(token);
         OfertaServico ofertaServico = buscarOfertaServico(agendamentoRequestDTO.getOfertaServicoId());
         Agendamento agendamento = new Agendamento(agendamentoRequestDTO, cliente, ofertaServico);
         agendamentoRepository.save(agendamento);
+        notificarClienteEprofissionalViaEmail(agendamento);
         return new AgendamentoResponseDTO(agendamento);
     }
 
@@ -97,7 +106,7 @@ public class AgendamentoService {
                 baseService.extrairNumeroPaginaValido(pagina),
                 baseService.transformarEmNumeroInt(qtdMaximaElementos, "qtdMaximaElementos é inválido"),
                 pageable -> agendamentoRepository.findByCliente_Id(cliente.getId(), pageable),
-                agendamento -> new AgendamentoResponseDTO(agendamento),
+                AgendamentoResponseDTO::new,
                 Sort.by("status")
                 );
     }
@@ -109,7 +118,7 @@ public class AgendamentoService {
                 baseService.extrairNumeroPaginaValido(pagina),
                 baseService.transformarEmNumeroInt(qtdMaximaElementos, "qtdMaximaElementos é inválido"),
                 pageable -> agendamentoRepository.findByOfertaServico_Profissional_Id(profissional.getId(), pageable),
-                agendamento -> new AgendamentoResponseDTO(agendamento),
+                AgendamentoResponseDTO::new,
                 Sort.by("status")
         );
     }
@@ -122,14 +131,10 @@ public class AgendamentoService {
         if (agendamento.getStatus().equals(StatusEnum.EM_ANDAMENTO)) {
             throw new BusinessException("Você já aceitou esse agendamento");
         }
-        if(agendamento.getContraOferta() != null){
-            agendamento.getContraOferta().setContraOfertaDataDeEntrega(null);
-            agendamento.getContraOferta().setContraOfertaPrecoDesejado(null);
-            agendamento.setContraOferta(null);
-            agendamento.setTemContraOferta(false);
-        }
+        removerContraOferta(agendamento);
         agendamento.setStatus(StatusEnum.EM_ANDAMENTO);
         agendamentoRepository.save(agendamento);
+        notificarClienteEprofissionalViaEmail(agendamento);
         return ResponseEntity.ok("Agendamento aceito com sucesso, por favor faça a entrega do serviço dentro do prazo");
     }
 
@@ -148,6 +153,7 @@ public class AgendamentoService {
         agendamento.getContraOferta().setContraOfertaPrecoDesejado(contraOfertaRequestDTO.getPrecoDesejado());
         agendamento.setStatus(StatusEnum.AGUARDANDO_CONFIRMACAO_CLIENTE);
         agendamentoRepository.save(agendamento);
+        notificarClienteEprofissionalViaEmail(agendamento);
         return ResponseEntity.ok("Contra-proposta enviada com sucesso, aguarde a resposta do cliente");
     }
 
@@ -162,12 +168,10 @@ public class AgendamentoService {
         }
         agendamento.setDataDeEntrega(agendamento.getContraOferta().getContraOfertaDataDeEntrega());
         agendamento.setPrecoDesejado(agendamento.getContraOferta().getContraOfertaPrecoDesejado());
-        agendamento.getContraOferta().setContraOfertaDataDeEntrega(null);
-        agendamento.getContraOferta().setContraOfertaPrecoDesejado(null);
-        agendamento.setContraOferta(null);
-        agendamento.setTemContraOferta(false);
+        removerContraOferta(agendamento);
         agendamento.setStatus(StatusEnum.EM_ANDAMENTO);
         agendamentoRepository.save(agendamento);
+        notificarClienteEprofissionalViaEmail(agendamento);
         return ResponseEntity.ok("Você aceitou a contra-proposta oferecida pelo profissional, aguarde até a conclusão do serviço");
     }
 
@@ -178,6 +182,7 @@ public class AgendamentoService {
         verificarSeAgendamentoPertenceAcliente(agendamento, cliente);
         agendamento.setStatus(StatusEnum.CANCELADO);
         agendamentoRepository.save(agendamento);
+        notificarClienteEprofissionalViaEmail(agendamento);
         return ResponseEntity.ok("Agendamento cancelado com sucesso");
     }
 
@@ -188,7 +193,22 @@ public class AgendamentoService {
         verificarSeAgendamentoPertenceAprofissional(agendamento, profissional);
         agendamento.setStatus(StatusEnum.CANCELADO);
         agendamentoRepository.save(agendamento);
+        notificarClienteEprofissionalViaEmail(agendamento);
         return ResponseEntity.ok("Agendamento cancelado com sucesso");
+    }
+
+    public ResponseEntity<String> profissionalConcluirAgendamento(String idAgendamento, JwtAuthenticationToken token){
+        Profissional profissional = baseService.buscarProfissionalPorTokenJWT(token);
+        Agendamento agendamento = buscarAgendamentoPorId(idAgendamento);
+        verificarSeAgendamentoPertenceAprofissional(agendamento, profissional);
+        verificarSeAgendamentoEstaCancelado(agendamento);
+        if (!agendamento.getStatus().equals(StatusEnum.EM_ANDAMENTO)) {
+            throw new BusinessException("Você não pode concluir um agendamento que não está em andamento");
+        }
+        agendamento.setStatus(StatusEnum.CONCLUIDO);
+        agendamentoRepository.save(agendamento);
+        notificarClienteEprofissionalViaEmail(agendamento);
+        return ResponseEntity.ok("Agendamento concluído com sucesso");
     }
 
 }
