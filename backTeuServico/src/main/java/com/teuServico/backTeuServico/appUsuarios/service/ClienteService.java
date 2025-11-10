@@ -8,6 +8,7 @@ import com.teuServico.backTeuServico.appUsuarios.model.Cliente;
 import com.teuServico.backTeuServico.appUsuarios.model.CredencialUsuario;
 import com.teuServico.backTeuServico.appUsuarios.repository.ClienteRepository;
 import com.teuServico.backTeuServico.shared.utils.Paginacao;
+import com.teuServico.backTeuServico.shared.utils.email.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -19,14 +20,14 @@ public class ClienteService {
     private final UsuarioBaseService usuarioBaseService;
     private final ClienteRepository clienteRepository;
     private final CredenciaisUsuarioService credenciaisUsuarioService;
-    private final Paginacao paginacao;
+    private final EmailService emailService;
 
     @Autowired
-    public ClienteService(UsuarioBaseService usuarioBaseService, ClienteRepository clienteRepository, CredenciaisUsuarioService credenciaisUsuarioService, Paginacao paginacao) {
+    public ClienteService(UsuarioBaseService usuarioBaseService, ClienteRepository clienteRepository, CredenciaisUsuarioService credenciaisUsuarioService, EmailService emailService) {
         this.usuarioBaseService = usuarioBaseService;
         this.clienteRepository = clienteRepository;
         this.credenciaisUsuarioService = credenciaisUsuarioService;
-        this.paginacao = paginacao;
+        this.emailService = emailService;
     }
 
     public TokenJWT criarUsuarioCliente(CredenciaisUsuarioRequestDTO credenciaisUsuarioRequestDTO, ClienteRequestDTO clienteRequestDTO){
@@ -35,6 +36,7 @@ public class ClienteService {
         TokenJWT tokenJWT = credenciaisUsuarioService.registrar(credencialUsuario, "CLIENTE");
         Cliente cliente = new Cliente(clienteRequestDTO, credencialUsuario);
         clienteRepository.save(usuarioBaseService.criptografarUsuario(cliente));
+        emailService.enviarEmailDeCriacaoDeConta(credencialUsuario.getEmail());
         return tokenJWT;
     }
 
