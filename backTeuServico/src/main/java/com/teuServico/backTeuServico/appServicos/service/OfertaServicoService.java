@@ -51,39 +51,19 @@ public class OfertaServicoService {
         baseService.verificarCampo("qtdMaximoElementos", qtdMaximoElementos);
     }
 
-    public OfertaServicoResponseDTO criarOfertaServico(OfertaServicoRequestDTO ofertaServicoRequestDTO, JwtAuthenticationToken token){
+    public OfertaServicoResponseDTO criarOfertaServico(OfertaServicoRequestDTO ofertaServicoRequestDTO, JwtAuthenticationToken token) {
+
         UUID idCredencial = UUID.fromString(token.getName());
-        Optional<Profissional> profissional = profissionalRepository.findByCredencialUsuario_Id(idCredencial);
-        if(profissional.isEmpty()){
-            throw new BusinessException("Profissional não foi encontrado");
-        }
+        Profissional profissional = profissionalRepository.findByCredencialUsuario_Id(idCredencial)
+                .orElseThrow(() -> new BusinessException("Profissional não foi encontrado"));
 
-        // Validar que ou tipoServicoId OU (tipoServicoNome E tipoServicoCategoria) sejam fornecidos
-        TipoServico tipoServico;
-        if (ofertaServicoRequestDTO.getTipoServicoId() != null) {
-            // Fluxo original: buscar por ID
-            Optional<TipoServico> tipoServicoOptional = tipoServicoRepository.findById(ofertaServicoRequestDTO.getTipoServicoId());
-            if(tipoServicoOptional.isEmpty()){
-                throw new BusinessException("TipoServico não existe");
-            }
-            tipoServico = tipoServicoOptional.get();
-        } else if (ofertaServicoRequestDTO.getTipoServicoNome() != null && !ofertaServicoRequestDTO.getTipoServicoNome().isBlank()) {
-            // Novo fluxo: buscar ou criar por nome
-            if (ofertaServicoRequestDTO.getTipoServicoCategoria() == null || ofertaServicoRequestDTO.getTipoServicoCategoria().isBlank()) {
-                throw new BusinessException("tipoServicoCategoria é obrigatório quando tipoServicoNome é informado");
-            }
-            tipoServico = tipoServicoService.buscarOuCriarTipoServico(
-                    ofertaServicoRequestDTO.getTipoServicoNome(),
-                    ofertaServicoRequestDTO.getTipoServicoCategoria()
-            );
-        } else {
-            throw new BusinessException("É necessário informar tipoServicoId ou (tipoServicoNome e tipoServicoCategoria)");
-        }
+        TipoServico tipoServico = tipoServicoRepository.findById(ofertaServicoRequestDTO.getTipoServicoId())
+                .orElseThrow(() -> new BusinessException("TipoServico não existe"));
 
-        OfertaServico ofertaServico = new OfertaServico(ofertaServicoRequestDTO, tipoServico, profissional.get());
+        OfertaServico ofertaServico = new OfertaServico(ofertaServicoRequestDTO, tipoServico, profissional);
         ofertaServicoRepository.save(ofertaServico);
-        OfertaServicoResponseDTO ofertaServicoResponseDTO = new OfertaServicoResponseDTO(ofertaServico);
-        return retornarResponseDescriptografado(ofertaServicoResponseDTO);
+
+        return retornarResponseDescriptografado(new OfertaServicoResponseDTO(ofertaServico));
     }
 
     public PaginacaoResponseDTO<OfertaServicoResponseDTO> minhasOfertasServico(String pagina, String qtdMaximoElementos, JwtAuthenticationToken token) {

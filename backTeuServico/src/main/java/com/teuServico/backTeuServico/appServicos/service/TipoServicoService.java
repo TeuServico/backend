@@ -44,30 +44,6 @@ public class TipoServicoService {
         return new TipoServicoResponseDTO(tipoServico);
     }
 
-    /**
-     * Busca um tipo de serviço por nome. Se não existir, cria automaticamente.
-     * @param nome Nome do tipo de serviço
-     * @param categoria Categoria do tipo de serviço
-     * @return TipoServico encontrado ou criado
-     */
-    public TipoServico buscarOuCriarTipoServico(String nome, String categoria) {
-        String nomeNormalizado = baseService.normalizarString(nome);
-        Optional<TipoServico> tipoServicoExistente = tipoServicoRepository.findFirstByNome(nomeNormalizado);
-
-        if (tipoServicoExistente.isPresent()) {
-            return tipoServicoExistente.get();
-        }
-
-        // Se não existir, cria um novo
-        TipoServicoRequestDTO tipoServicoRequestDTO = new TipoServicoRequestDTO();
-        tipoServicoRequestDTO.setNome(nome);
-        tipoServicoRequestDTO.setCategoria(categoria);
-
-        TipoServico novoTipoServico = new TipoServico(normalizarTipoServico(tipoServicoRequestDTO));
-        tipoServicoRepository.save(novoTipoServico);
-        return novoTipoServico;
-    }
-
     public PaginacaoResponseDTO<TipoServicoResponseDTO> buscarTodos(String pagina, String qtdMaximoElementos){
         baseService.verificarCampo("qtdMaximo elementos", qtdMaximoElementos);
         return paginacao.listarTodos(
