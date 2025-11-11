@@ -6,6 +6,7 @@ import com.teuServico.backTeuServico.agendamento.dto.ContraOfertaRequestDTO;
 import com.teuServico.backTeuServico.agendamento.service.AgendamentoService;
 import com.teuServico.backTeuServico.shared.utils.PaginacaoResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -58,7 +59,13 @@ public class AgendamentoController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('CLIENTE')")
     @GetMapping("cliente/meusagendamentos")
-    public PaginacaoResponseDTO<AgendamentoResponseDTO> meusAgendamentosCliente(@RequestParam String pagina, @RequestParam String qtdMaximaElementos, JwtAuthenticationToken token){
+    public PaginacaoResponseDTO<AgendamentoResponseDTO> meusAgendamentosCliente(
+            @Parameter(description = "Número da página que deseja consultar", example = "1")
+            @RequestParam String pagina,
+            @Parameter(description = "Quantidade máxima de elementos por página", example = "10")
+            @RequestParam String qtdMaximaElementos,
+            JwtAuthenticationToken token
+    ){
         return agendamentoService.meusAgendamentosCliente(pagina, qtdMaximaElementos, token);
     }
 
@@ -77,7 +84,12 @@ public class AgendamentoController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAuthority('PROFISSIONAL')")
     @GetMapping("profissional/meusagendamentos")
-    public PaginacaoResponseDTO<AgendamentoResponseDTO> meusAgendamentosProfissional(@RequestParam String pagina, @RequestParam String qtdMaximaElementos, JwtAuthenticationToken token){
+    public PaginacaoResponseDTO<AgendamentoResponseDTO> meusAgendamentosProfissional(
+            @Parameter(description = "Número da página que deseja consultar", example = "1")
+            @RequestParam String pagina,
+            @Parameter(description = "Quantidade máxima de elementos por página", example = "10")
+            @RequestParam String qtdMaximaElementos,
+            JwtAuthenticationToken token){
         return agendamentoService.meusAgendamentosProfissional(pagina, qtdMaximaElementos, token);
     }
 
