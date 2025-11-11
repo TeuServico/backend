@@ -11,20 +11,41 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Serviço utilitário que centraliza validações comuns a toda aplicação.
+ */
 @Service
 public class BaseService {
     private final ClienteRepository clienteRepository;
     private final ProfissionalRepository profissionalRepository;
 
+    /**
+     * Construtor da classe BaseService.
+     *
+     * @param clienteRepository      repositório de clientes
+     * @param profissionalRepository repositório de profissionais
+     */
     public BaseService(ClienteRepository clienteRepository, ProfissionalRepository profissionalRepository) {
         this.clienteRepository = clienteRepository;
         this.profissionalRepository = profissionalRepository;
     }
 
+    /**
+     * Normaliza uma string convertendo-a para letras minúsculas.
+     *
+     * @param conteudo conteúdo a ser normalizado
+     * @return string em minúsculas
+     */
     public String normalizarString(String conteudo){
         return conteudo.toLowerCase();
     }
 
+    /**
+     * Valida se o parâmetro fornecido é um ID numérico válido.
+     *
+     * @param valorParametro valor a ser validado
+     * @throws BusinessException se o valor for nulo, vazio ou não numérico
+     */
     public void validarId(String valorParametro){
         verificarCampo("id", valorParametro);
         if (!valorParametro.matches("\\d+")){
@@ -32,16 +53,29 @@ public class BaseService {
         }
     }
 
+    /**
+     * Converte uma string em número inteiro, lançando exceção personalizada em caso de erro.
+     *
+     * @param numero            string a ser convertida
+     * @param mensagemException mensagem da exceção em caso de falha
+     * @return número inteiro convertido
+     * @throws BusinessException se a conversão falhar
+     */
     public int transformarEmNumeroInt(String numero, String mensagemException){
-        int numeroConvertido;
         try {
-            numeroConvertido = Integer.parseInt(numero);
+            return Integer.parseInt(numero);
         } catch (NumberFormatException e) {
             throw new BusinessException(mensagemException);
         }
-        return numeroConvertido;
     }
 
+    /**
+     * Verifica se um campo obrigatório foi preenchido.
+     *
+     * @param nomeParametro  nome do campo
+     * @param valorParametro valor do campo
+     * @throws BusinessException se o campo for nulo ou vazio
+     */
     public void verificarCampo(String nomeParametro, String valorParametro) {
         if (valorParametro == null || valorParametro.isBlank()) {
             String motivo = valorParametro == null ? "nulo" : "vazio";
@@ -49,6 +83,13 @@ public class BaseService {
         }
     }
 
+    /**
+     * Extrai e valida o número da página a partir de uma string.
+
+     * @param pagina string representando o número da página
+     * @return número da página como inteiro
+     * @throws BusinessException se o valor for inválido ou menor que 1
+     */
     public int extrairNumeroPaginaValido(String pagina){
         verificarCampo("pagina", pagina);
         int numeroPagina = transformarEmNumeroInt(pagina, "Número de página inválido: " + pagina);
@@ -58,6 +99,12 @@ public class BaseService {
         return numeroPagina;
     }
 
+    /**
+     * Valida e converte uma string para UUID.
+     * @param uuid string a ser validada
+     * @return UUID convertido
+     * @throws BusinessException se o valor for inválido
+     */
     public UUID validarUUID(String uuid){
         verificarCampo("uuid", uuid);
         try {
@@ -67,6 +114,12 @@ public class BaseService {
         }
     }
 
+    /**
+     * Busca um cliente com base no token JWT fornecido.
+     * @param token token JWT contendo o ID da credencial
+     * @return cliente correspondente
+     * @throws BusinessException se o cliente não for encontrado
+     */
     public Cliente buscarClientePorTokenJWT(JwtAuthenticationToken token){
         UUID idCredencial = UUID.fromString(token.getName());
         Optional<Cliente> cliente = clienteRepository.findByCredencialUsuario_Id(idCredencial);
@@ -76,6 +129,12 @@ public class BaseService {
         return cliente.get();
     }
 
+    /**
+     * Busca um profissional com base no token JWT fornecido.
+     * @param token token JWT contendo o ID da credencial
+     * @return profissional correspondente
+     * @throws BusinessException se o profissional não for encontrado
+     */
     public Profissional buscarProfissionalPorTokenJWT(JwtAuthenticationToken token){
         UUID idCredencial = UUID.fromString(token.getName());
         Optional<Profissional> profissional = profissionalRepository.findByCredencialUsuario_Id(idCredencial);
@@ -84,5 +143,4 @@ public class BaseService {
         }
         return profissional.get();
     }
-
 }

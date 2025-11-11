@@ -32,16 +32,33 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Classe de configuração de segurança da aplicação.
+ * Define políticas de autenticação, autorização e manipulação de JWT.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+    /**
+     * Recurso contendo a chave pública RSA para validação de tokens JWT.
+     */
     @Value("${JWT_PUBLIC_KEY}")
     private Resource publicKeyResource;
+
+    /**
+     * Recurso contendo a chave privada RSA para assinatura de tokens JWT.
+     */
     @Value("${JWT_PRIVATE_KEY}")
     private Resource privateKeyResource;
 
+    /**
+     * Configura a cadeia de filtros de segurança HTTP.
+     * @param httpSecurity objeto de configuração do Spring Security
+     * @return cadeia de filtros configurada
+     * @throws Exception em caso de erro na configuração
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
@@ -61,6 +78,10 @@ public class SecurityConfig {
         return httpSecurity.build();
     }
 
+    /**
+     * Converte o token JWT em uma instância de autenticação com base na claim "role".
+     * @return conversor de autenticação JWT
+     */
     @Bean
     public Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
         return jwt -> {
@@ -70,7 +91,11 @@ public class SecurityConfig {
         };
     }
 
-
+    /**
+     * Lê e converte a chave pública RSA do recurso configurado.
+     * @return chave pública RSA
+     * @throws Exception em caso de erro na leitura ou conversão
+     */
     @Bean
     public RSAPublicKey rsaPublicKey() throws Exception {
         String publicKeyContent = new String(publicKeyResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
@@ -83,6 +108,11 @@ public class SecurityConfig {
         return (RSAPublicKey) keyFactory.generatePublic(spec);
     }
 
+    /**
+     * Lê e converte a chave privada RSA do recurso configurado.
+     * @return chave privada RSA
+     * @throws Exception em caso de erro na leitura ou conversão
+     */
     @Bean
     public RSAPrivateKey rsaPrivateKey() throws Exception {
         String privateKeyContent = new String(privateKeyResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
@@ -95,11 +125,22 @@ public class SecurityConfig {
         return (RSAPrivateKey) keyFactory.generatePrivate(spec);
     }
 
+    /**
+     * Cria o decodificador de JWT usando a chave pública RSA.
+     * @param publicKey chave pública RSA
+     * @return instância de JwtDecoder
+     */
     @Bean
     public JwtDecoder jwtDecoder(RSAPublicKey publicKey) {
         return NimbusJwtDecoder.withPublicKey(publicKey).build();
     }
 
+    /**
+     * Cria o codificador de JWT usando as chaves RSA.
+     * @param publicKey  chave pública RSA
+     * @param privateKey chave privada RSA
+     * @return instância de JwtEncoder
+     */
     @Bean
     public JwtEncoder jwtEncoder(RSAPublicKey publicKey, RSAPrivateKey privateKey) {
         JWK jwk = new RSAKey.Builder(publicKey).privateKey(privateKey).build();
@@ -107,9 +148,12 @@ public class SecurityConfig {
         return new NimbusJwtEncoder(jwks);
     }
 
+    /**
+     * Codificador de senhas usando BCrypt.
+     * @return instância de BCryptPasswordEncoder
+     */
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }
