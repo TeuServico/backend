@@ -14,6 +14,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller responsável por gerenciar os endpoints de OfertaServico
+ * <p>
+ */
 @RestController
 @RequestMapping("ofertaservico/")
 public class OfertaServicoController {

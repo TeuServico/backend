@@ -11,6 +11,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+/**
+ * Serviço responsável pelas operações relacionadas ao profissional.
+ * <p>
+ */
 @Service
 public class ProfissionalService {
     private final UsuarioBaseService usuarioBaseService;
@@ -18,6 +22,14 @@ public class ProfissionalService {
     private final CredenciaisUsuarioService credenciaisUsuarioService;
     private final EmailService emailService;
 
+    /**
+     * Construtor da classe {@code ProfissionalService}.
+     *
+     * @param usuarioBaseService serviço utilitário para operações comuns de usuário
+     * @param profissionalRepository repositório de persistência de profissionais
+     * @param credenciaisUsuarioService serviço de autenticação e registro de credenciais
+     * @param emailService serviço de envio de e-mails
+     */
     public ProfissionalService(UsuarioBaseService usuarioBaseService, ProfissionalRepository profissionalRepository, CredenciaisUsuarioService credenciaisUsuarioService, EmailService emailService) {
         this.usuarioBaseService = usuarioBaseService;
         this.profissionalRepository = profissionalRepository;
@@ -26,6 +38,15 @@ public class ProfissionalService {
         this.emailService = emailService;
     }
 
+    /**
+     * Cria um novo profissional no sistema com base nas credenciais e dados pessoais fornecidos.
+     * <p>
+     * Valida CPF e telefone, registra as credenciais como PROFISSIONAL, salva os dados do profissional
+     * criptografados no banco de dados e envia um e-mail de confirmação de criação de conta.
+     * @param credenciaisUsuarioRequestDTO DTO contendo e-mail e senha do profissional
+     * @param profissionalRequestDTO DTO contendo dados pessoais do profissional.
+     * @return {@link TokenJWT} autenticado para o profissional recém-criado
+     */
     public TokenJWT criarUsuarioProfissional(CredenciaisUsuarioRequestDTO credenciaisUsuarioRequestDTO, ProfissionalRequestDTO profissionalRequestDTO){
         usuarioBaseService.validarUnicidadeInfoUsuario(profissionalRequestDTO.getCpf(), profissionalRequestDTO.getTelefone());
         CredencialUsuario credencialUsuario = new CredencialUsuario(credenciaisUsuarioRequestDTO);
@@ -36,6 +57,15 @@ public class ProfissionalService {
         return tokenJWT;
     }
 
+    /**
+     * Recupera os dados do perfil do profissional autenticado.
+     * <p>
+     * Utiliza o token JWT para identificar o profissional e retorna os dados formatados
+     * em um {@link ProfissionalResponseDTO}.
+     *
+     * @param token token JWT de autenticação do profissional
+     * @return {@link ProfissionalResponseDTO} contendo os dados do perfil do profissional
+     */
     public ProfissionalResponseDTO meuPerfil(JwtAuthenticationToken token){
         UUID idCredencial = UUID.fromString(token.getName());
         return usuarioBaseService.meuPerfil(idCredencial, profissionalRepository::findByCredencialUsuario_Id, ProfissionalResponseDTO::new);

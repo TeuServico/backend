@@ -14,6 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+
+/**
+ * Controller responsável por gerenciar os endpoints de TipoServico
+ * <p>
+ */
 @RestController
 @RequestMapping("tiposervico/")
 public class TipoServicoController {

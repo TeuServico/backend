@@ -6,7 +6,6 @@ import com.teuServico.backTeuServico.appServicos.model.OfertaServico;
 import com.teuServico.backTeuServico.appServicos.model.TipoServico;
 import com.teuServico.backTeuServico.appServicos.repository.OfertaServicoRepository;
 import com.teuServico.backTeuServico.appServicos.repository.TipoServicoRepository;
-import com.teuServico.backTeuServico.appServicos.service.TipoServicoService;
 import com.teuServico.backTeuServico.appUsuarios.model.Profissional;
 import com.teuServico.backTeuServico.appUsuarios.repository.ProfissionalRepository;
 import com.teuServico.backTeuServico.shared.exceptions.BusinessException;
@@ -21,6 +20,10 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Serviço responsável pela gestão de ofertas de serviços criadas por profissionais.
+ * <p>
+ */
 @Service
 public class OfertaServicoService {
     private final BaseService baseService;
@@ -41,16 +44,32 @@ public class OfertaServicoService {
         this.paginacao = paginacao;
     }
 
+    /**
+     * Descriptografa o nome do profissional antes de retornar o DTO.
+     * @param ofertaServicoResponseDTO DTO com dados da oferta
+     * @return DTO com nome do profissional descriptografado
+     */
     private OfertaServicoResponseDTO retornarResponseDescriptografado(OfertaServicoResponseDTO ofertaServicoResponseDTO){
         ofertaServicoResponseDTO.setProfissionalNome(criptografia.descriptografar(ofertaServicoResponseDTO.getProfissionalNome()));
         return ofertaServicoResponseDTO;
     }
 
+    /**
+     * Valida os parâmetros de paginação.
+     * @param pagina número da página
+     * @param qtdMaximoElementos quantidade máxima de elementos por página
+     */
     private void verificarCamposParaPaginacao(String pagina, String qtdMaximoElementos){
         baseService.verificarCampo("pagina", pagina);
         baseService.verificarCampo("qtdMaximoElementos", qtdMaximoElementos);
     }
 
+    /**
+     * Cria uma nova oferta de serviço associada ao profissional autenticado.
+     * @param ofertaServicoRequestDTO dados da oferta
+     * @param token token JWT do profissional
+     * @return DTO da oferta criada
+     */
     public OfertaServicoResponseDTO criarOfertaServico(OfertaServicoRequestDTO ofertaServicoRequestDTO, JwtAuthenticationToken token) {
 
         UUID idCredencial = UUID.fromString(token.getName());
@@ -66,6 +85,13 @@ public class OfertaServicoService {
         return retornarResponseDescriptografado(new OfertaServicoResponseDTO(ofertaServico));
     }
 
+    /**
+     * Lista as ofertas de serviço criadas pelo profissional autenticado.
+     * @param pagina número da página
+     * @param qtdMaximoElementos quantidade máxima de elementos por página
+     * @param token token JWT do profissional
+     * @return lista paginada de ofertas
+     */
     public PaginacaoResponseDTO<OfertaServicoResponseDTO> minhasOfertasServico(String pagina, String qtdMaximoElementos, JwtAuthenticationToken token) {
         verificarCamposParaPaginacao(pagina, qtdMaximoElementos);
         UUID idCredencial = UUID.fromString(token.getName());
@@ -82,6 +108,13 @@ public class OfertaServicoService {
         );
     }
 
+    /**
+     * Busca ofertas de serviço pelo nome do tipo de serviço.
+     * @param pagina número da página
+     * @param qtdMaximoElementos quantidade máxima de elementos por página
+     * @param nome nome do tipo de serviço
+     * @return lista paginada de ofertas
+     */
     public PaginacaoResponseDTO<OfertaServicoResponseDTO> buscarOfertasServicosPorTipoServicoNome(String pagina, String qtdMaximoElementos, String nome) {
         verificarCamposParaPaginacao(pagina, qtdMaximoElementos);
         baseService.verificarCampo("nome", nome);
@@ -95,6 +128,13 @@ public class OfertaServicoService {
 
     }
 
+    /**
+     * Busca ofertas de serviço pela categoria do tipo de serviço.
+     * @param pagina número da página
+     * @param qtdMaximoElementos quantidade máxima de elementos por página
+     * @param categoria categoria do tipo de serviço
+     * @return lista paginada de ofertas
+     */
     public PaginacaoResponseDTO<OfertaServicoResponseDTO> buscarOfertasServicosPorTipoServicoCategoria(String pagina, String qtdMaximoElementos, String categoria){
         verificarCamposParaPaginacao(pagina, qtdMaximoElementos);
         baseService.verificarCampo("categoria",categoria);
@@ -105,7 +145,5 @@ public class OfertaServicoService {
                 ofertaServico -> retornarResponseDescriptografado(new OfertaServicoResponseDTO(ofertaServico)),
                 Sort.by("tipoServico.nome")
         );
-
     }
-
 }

@@ -9,6 +9,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller responsável por gerenciar os endpoints de CredencialUsuario
+ * <p>
+ */
 @RestController
 @RequestMapping("credenciais/")
 public class CredenciaisUsuarioController {
