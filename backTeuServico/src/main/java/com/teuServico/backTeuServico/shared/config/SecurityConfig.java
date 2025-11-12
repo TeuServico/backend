@@ -69,6 +69,8 @@ public class SecurityConfig {
                         .requestMatchers("/cliente/criar").permitAll()
                         .requestMatchers("/profissional/criar").permitAll()
                         .requestMatchers("/credenciais/login").permitAll()
+                        .requestMatchers("/credenciais/solicitar/resetsenha").permitAll()
+                        .requestMatchers("/credenciais/resetsenha/inserirnovasenha").permitAll()
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
