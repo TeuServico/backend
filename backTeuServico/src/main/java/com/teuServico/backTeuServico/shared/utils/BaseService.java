@@ -65,7 +65,7 @@ public class BaseService {
         try {
             return Integer.parseInt(numero);
         } catch (NumberFormatException e) {
-            throw new BusinessException(mensagemException);
+            throw new BusinessException("Falha em converter "+ mensagemException + " em um número int");
         }
     }
 
