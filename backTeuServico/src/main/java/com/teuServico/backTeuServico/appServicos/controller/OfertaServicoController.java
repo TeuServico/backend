@@ -14,6 +14,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * Controller responsável por gerenciar os endpoints de OfertaServico
  * <p>
@@ -66,7 +68,7 @@ public class OfertaServicoController {
             @Parameter(description = "Número da página que deseja consultar", example = "1")
             @RequestParam String pagina,
             @Parameter(description = "Quantidade máxima de elementos por página", example = "10")
-            String qtdMaximoElementos,
+            @RequestParam String qtdMaximoElementos,
             JwtAuthenticationToken token) {
         return ofertaServicoService.minhasOfertasServico(pagina, qtdMaximoElementos, token);
     }
@@ -86,7 +88,7 @@ public class OfertaServicoController {
             @Parameter(description = "Número da página que deseja consultar", example = "1")
             @RequestParam String pagina,
             @Parameter(description = "Quantidade máxima de elementos por página", example = "10")
-            String qtdMaximoElementos,
+            @RequestParam String qtdMaximoElementos,
             @Parameter(description = "Nome que deseja filtrar", example = "Desenvolver página web")
             @RequestParam String nome) {
         return ofertaServicoService.buscarOfertasServicosPorTipoServicoNome(pagina, qtdMaximoElementos, nome);
@@ -107,10 +109,34 @@ public class OfertaServicoController {
             @Parameter(description = "Número da página que deseja consultar", example = "1")
             @RequestParam String pagina,
             @Parameter(description = "Quantidade máxima de elementos por página", example = "10")
-            String qtdMaximoElementos,
+            @RequestParam String qtdMaximoElementos,
             @Parameter(description = "Categoria que deseja filtrar", example = "PROGRAMAÇÃO")
             @RequestParam String categoria) {
         return ofertaServicoService.buscarOfertasServicosPorTipoServicoCategoria(pagina, qtdMaximoElementos, categoria);
+    }
+
+    @GetMapping("buscar/contem/tags")
+    @Operation(
+            summary = "Busca ofertas de serviço por tags",
+            description = "Retorna uma lista paginada com todas as ofertas de serviço que contenham ao menos uma das tags fornecidas."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Consulta realizada com sucesso"),
+            @ApiResponse(responseCode = "400", ref = "#/components/responses/FalhaNaRequisicao"),
+            @ApiResponse(responseCode = "409", ref = "#/components/responses/Conflito"),
+            @ApiResponse(responseCode = "500", ref = "#/components/responses/ErroInterno")
+    })
+    public PaginacaoResponseDTO<OfertaServicoResponseDTO> buscarOfertasPorTags(
+            @Parameter(description = "Número da página que deseja consultar", example = "1")
+            @RequestParam String pagina,
+
+            @Parameter(description = "Quantidade máxima de elementos por página", example = "10")
+            @RequestParam String qtdMaximoElementos,
+
+            @Parameter(description = "Lista de tags para filtrar as ofertas", example = "[\"java\", \"react\"]")
+            @RequestParam List<String> tags
+    ) {
+        return ofertaServicoService.buscarOfertasPorTags(pagina, qtdMaximoElementos, tags);
     }
 
 }

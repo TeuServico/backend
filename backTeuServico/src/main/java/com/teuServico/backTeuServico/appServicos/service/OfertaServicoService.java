@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -71,7 +72,7 @@ public class OfertaServicoService {
      * @return DTO da oferta criada
      */
     public OfertaServicoResponseDTO criarOfertaServico(OfertaServicoRequestDTO ofertaServicoRequestDTO, JwtAuthenticationToken token) {
-
+        ofertaServicoRequestDTO.setTags(ofertaServicoRequestDTO.getTags().stream().map(baseService::normalizarString).toList());
         UUID idCredencial = UUID.fromString(token.getName());
         Profissional profissional = profissionalRepository.findByCredencialUsuario_Id(idCredencial)
                 .orElseThrow(() -> new BusinessException("Profissional não foi encontrado"));
@@ -146,4 +147,27 @@ public class OfertaServicoService {
                 Sort.by("tipoServico.nome")
         );
     }
+
+    /**
+     * Busca paginada de ofertas de serviço que contenham pelo menos uma das tags fornecidas.
+     * @param pagina número da página
+     * @param qtdMaximoElementos quantidade máxima de elementos por página
+     * @param tags lista de tags para filtrar as ofertas
+     * @return página com as ofertas encontradas
+     */
+    public PaginacaoResponseDTO<OfertaServicoResponseDTO> buscarOfertasPorTags(String pagina, String qtdMaximoElementos, List<String> tags){
+        verificarCamposParaPaginacao(pagina, qtdMaximoElementos);
+        if(tags == null || tags.isEmpty()){
+            throw new BusinessException("tags deve conter ao menos uma tag");
+        }
+        List<String> tagsNormalizadas = tags.stream().map(baseService::normalizarString).toList();
+        return paginacao.listarPor(
+                baseService.extrairNumeroPaginaValido(pagina),
+                baseService.transformarEmNumeroInt(qtdMaximoElementos, "qtdMaximoElementos"),
+                pageable -> ofertaServicoRepository.findByTagsIn(tagsNormalizadas, pageable),
+                ofertaServico -> retornarResponseDescriptografado(new OfertaServicoResponseDTO(ofertaServico)),
+                Sort.by("tipoServico.categoria")
+        );
+    }
+
 }

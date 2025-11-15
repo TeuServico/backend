@@ -55,7 +55,10 @@ public class OfertaServico {
      */
     @ElementCollection
     @CollectionTable(name = "oferta_servico_tags", joinColumns = @JoinColumn(name = "oferta_servico_id"),
-            indexes = @Index(name = "idx_tag", columnList = "tag")
+            indexes = {
+                    @Index(name = "idx_tag", columnList = "tag"),
+                    @Index(name = "idx_oferta_servico_id", columnList = "oferta_servico_id")
+            }
     )
     @Column(name = "tag")
     private List<String> tags = new ArrayList<>();

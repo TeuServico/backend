@@ -1,12 +1,14 @@
 package com.teuServico.backTeuServico.appServicos.repository;
 
 import com.teuServico.backTeuServico.appServicos.model.OfertaServico;
+import jdk.dynalink.linker.LinkerServices;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -39,4 +41,12 @@ public interface OfertaServicoRepository extends JpaRepository<OfertaServico, Lo
      * @return página com as ofertas encontradas
      */
     Page<OfertaServico> findByTipoServico_Categoria(String categoria, Pageable pageable);
+
+    /**
+     * Busca ofertas de serviço que contenham pelo menos uma das tags fornecidas.
+     * @param tags lista de tags para filtrar as ofertas
+     * @param pageable informações de paginação
+     * @return página com as ofertas encontradas
+     */
+    Page<OfertaServico> findByTagsIn(List<String> tags, Pageable pageable);
 }
