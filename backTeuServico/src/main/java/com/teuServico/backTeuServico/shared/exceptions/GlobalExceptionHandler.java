@@ -59,6 +59,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneral(Exception e, WebRequest request) {
+        logger.error("Erro inesperado no servidor", e);
         if (e instanceof UndeclaredThrowableException undeclared) {
             Throwable cause = undeclared.getUndeclaredThrowable();
             if (cause instanceof BusinessException business) {
