@@ -1,5 +1,6 @@
 package com.teuServico.backTeuServico.shared.utils;
 import com.teuServico.backTeuServico.shared.exceptions.BusinessException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -17,10 +18,13 @@ import java.util.Base64;
 
 @Component
 public class Criptografia {
+
     /** Algoritmo de criptografia utilizado. */
     private final String ALGORITHM = "AES";
+
     /** Chave secreta obtida da variável de ambiente. */
-    private final String SECRET_KEY = System.getenv("SECRET_KEY") ;
+    @Value("${CRIPTOGRAFIA_SECRET_KEY}")
+    private String SECRET_KEY;
 
     /**
      * Criptografa o texto fornecido.

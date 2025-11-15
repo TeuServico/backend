@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -57,14 +58,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @return {@link ResponseEntity} com os detalhes do erro.
      */
     @ExceptionHandler(Exception.class)
-    private ResponseEntity<Object> handleGeneral(Exception e, WebRequest request) {
+    public ResponseEntity<Object> handleGeneral(Exception e, WebRequest request) {
+        logger.error("Erro inesperado no servidor", e);
         if (e instanceof UndeclaredThrowableException undeclared) {
-            return handleBusinessException((BusinessException) undeclared.getUndeclaredThrowable(), request);
-        } else {
-            String message = "Erro no servidor, não foi possível processar sua solicitação.";
-            ResponseError error = responseError(message, HttpStatus.INTERNAL_SERVER_ERROR);
-            return handleExceptionInternal(e, error, defaultHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+            Throwable cause = undeclared.getUndeclaredThrowable();
+            if (cause instanceof BusinessException business) {
+                return handleBusinessException(business, request);
+            }
         }
+        String message = "Erro no servidor, não foi possível processar sua solicitação.";
+        ResponseError error = responseError(message, HttpStatus.INTERNAL_SERVER_ERROR);
+        return handleExceptionInternal(e, error, defaultHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 
     /**
@@ -74,7 +78,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @return {@link ResponseEntity} com os detalhes do erro.
      */
     @ExceptionHandler(BusinessException.class)
-    private ResponseEntity<Object> handleBusinessException(BusinessException e, WebRequest request) {
+    public ResponseEntity<Object> handleBusinessException(BusinessException e, WebRequest request) {
         ResponseError error = responseError(e.getMessage(), HttpStatus.CONFLICT);
         return handleExceptionInternal(e, error, defaultHeaders(), HttpStatus.CONFLICT, request);
     }
@@ -92,7 +96,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @return {@link ResponseEntity} com os detalhes do erro.
      */
     @Override
-    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+    public ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex,
             HttpHeaders headers,
             HttpStatusCode status,
@@ -118,7 +122,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @return {@link ResponseEntity} com os detalhes do erro.
      */
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+    public ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
             HttpHeaders headers,
             HttpStatusCode status,
@@ -133,6 +137,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         String mensagemFinal = String.join("; ", mensagens);
         ResponseError error = responseError(mensagemFinal, HttpStatus.BAD_REQUEST);
         return handleExceptionInternal(ex, error, defaultHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    /**
+     * Trata exceções do tipo {@link AccessDeniedException}, quando um usuário tenta acesso a um recurso ao qual não tem permissão
+     * @param ex Exceção lancada
+     * @param request Contexto da requisição.
+     * @return {@link ResponseEntity} com os detalhes do erro.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex, WebRequest request) {
+        String message = "Você não tem permissão para acessar este recurso.";
+        ResponseError error = responseError(message, HttpStatus.FORBIDDEN);
+        return handleExceptionInternal(ex, error, defaultHeaders(), HttpStatus.FORBIDDEN, request);
     }
 
 }
